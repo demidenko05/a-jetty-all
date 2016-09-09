@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title> Simple WEB-app to test servlets, UTF-8 I18N.</title>
+</head>
+<body>
+  <h2>This is simple HTML page.</h2>
+  <h2>Servlet and UTF-8 I18N test:</h2>
+
+    <form action="webtest/" method="GET" accept-charset="UTF-8">
+      <table>
+        <tr>
+          <td>
+            <label>Say hello in your language:</label>
+          </td>
+          <td>
+            <div>
+              <input name="hello" value="привет">
+            </div>
+          </td>
+        </tr>
+      </table>
+      <div>
+        <input  type="submit"/>
+      </div>
+    </form>
+    <h2>JSP/JSTL test:</h2>
+    <a href="test.jsp">do test.jsp</a>
+    <h2>JSP say hello test:</h2>
+    <a href="hello.jsp">do hello.jsp</a>
+</body>
+</html>

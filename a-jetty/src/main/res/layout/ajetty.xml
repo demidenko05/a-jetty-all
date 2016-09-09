@@ -1,0 +1,65 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical"
+  xmlns:tools="http://schemas.android.com/tools"
+  tools:context="org.beigesoft.android.ajetty.AJetty" >
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal" >
+
+    <TextView
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:text="@string/status" />
+    
+    <TextView
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:id="@+id/tvStatus"
+      android:textSize="20sp"
+      android:text="@string/stopped" />
+  </LinearLayout>
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal" >
+
+    <TextView
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:text="@string/port" />
+    
+    <EditText
+      android:id="@+id/etPort"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:inputType="number" />
+  </LinearLayout>
+
+  <Button
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/btnStart"
+    android:text="@string/start" />
+
+  <Button
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/btnStop"
+    android:text="@string/stop" />
+
+  <TextView
+    android:id="@+id/tvLink"
+    android:layout_marginTop="40sp"
+    android:gravity="center_horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:textSize="20sp" />
+
+</LinearLayout>

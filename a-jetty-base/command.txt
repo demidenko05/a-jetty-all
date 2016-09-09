@@ -1,0 +1,2 @@
+grep --include=*.java -r '.' -e "java\.beans"
+find . -type f -name "*.java" -exec sed -i "s/java\.beans/ajava\.beans/g" {} +

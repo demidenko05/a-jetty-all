@@ -1,0 +1,71 @@
+@SuppressWarnings("unchecked")
+@SuppressWarnings("rawtypes")
+
+java -jar a-jetty-base.jar jetty:base=/home/yury/a-jetty port=8080
+
+$ANT_HOME/bin/ant -Dtomcat.home=$TOMCATA_HOME -Dwebapp.path=target/webapp-test/
+
+java -jar $ANDROID_HOME/build-tools/23.0.3/lib/dx.jar --dex --output=webapp-test.jar classes/ lib/
+
+$ANDROID_HOME/tools/lint --html target/lint.html --sources src/main --classpath target .
+
+
+tar -zcvf beige-erp-ijetty.zip beige-erp-ijetty
+
+alt-r bash history
+
+
+
+$ANDROID_HOME/tools/lint --html target/lint.html --sources src/main --classpath target .
+
+svn co https://svn.apache.org/repos/asf/tomcat/taglibs/trunks apache-taglibs
+
+adb shell pm list packages
+
+adb shell pm path org.mortbay.ijetty
+
+adb pull /data/app/org.mortbay.ijetty-1.apk
+
+
+tomcat build:
+$ANT_HOME/bin/ant clean clean-depend
+$ANT_HOME/bin/ant -Dno.build.dbcp=true
+
+find . -type f -not -name "*.jar" -exec sed -i "s/java\.beans/beans/g" {} +
+find . -type f -name "*.java" -exec sed -i "s/java\.beans/beans/g" {} +
+find . -type f -name "*.java" -exec sed -i "s/ctxt\.getClassLoader()/ctxt\.getClass()\.getClassLoader()/g" {} +
+find . -type f -name "pom.xml" -exec sed -i "s/1.0.2-SNAPSHOT/1.0.3-SNAPSHOT/g" {} +
+
+mvn clean install tomcat7:run -P webtest
+
+grep -F --include=*.jsp -rw '.' -e 'getMsg("$'
+
+[INFO] trouble processing "javax/xml/ws/WebServiceRef.class":
+[INFO] 
+[INFO] Ill-advised or mistaken usage of a core class (java.* or javax.*)
+[INFO] when not building a core library.
+
+mvn dependency:sources
+mvn dependency:resolve -Dclassifier=javadoc
+
+adb logcat -s "Jetty"
+
+mvn -Dmaven.surefire.debug test  //The tests will automatically pause and await a remote debugger on port 5005
+
+adb forward tcp:1044 jdwp:8823
+
+adb pull /data/data/org.beigesoft.androidtest/beigedbtest
+
+mvn android:instrument
+
+stop at org.beigesoft.orm.test.TestSimple:80
+
+eval srvOrm.retrieveEntityWithConditions(org.beigesoft.persistable.RoleJetty.class, "where ITSNAME='user'")
+
+stop at org.beigesoft.android.sqlite.service.SrvDatabase:247
+
+jdb -attach localhost:1044 -sourcepath ~/git/beige-software/beige-orm/src/main/java:~/git/beige-software/beige-android/src/main/java
+
+jdb -attach 5005 -sourcepath ~/git/beige-software/beige-orm/src/main/java:~/git/beige-software/beige-orm/src/test/java
+
+jdb -attach 5005 -sourcepath ~/git/beige-software/beige-settings/src/main/java

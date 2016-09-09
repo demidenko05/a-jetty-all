@@ -1,0 +1,11 @@
+target/
+uml/
+test-output/
+.classpath
+.project
+release.properties
+.settings/
+.checkstyle
+.pmd
+/maven-central-deploy.log
+/maven-central-deploy.sh~

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+  <!-- All eclipse sources: -->
+  <Match>
+    <Package name="~org\.eclipse.*"/>
+  </Match>
+  <!-- All android generated sources: -->
+  <Match>
+    <Class name="~.*R\$.*"/>
+  </Match>
+  <Match>
+    <Class name="org.beigesoft.ajetty.FactoryWebAppClassLoaderStd"/>
+    <Method name="create"/>
+    <Bug pattern="DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED"/>
+  </Match>
+  <Match>
+    <Class name="org.beigesoft.ajetty.FactoryWebAppClassLoaderEmbedded"/>
+    <Method name="create"/>
+    <Bug pattern="DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED"/>
+  </Match>
+  <Match>
+    <Class name="org.beigesoft.android.ajetty.WebAppClassLoaderAndroid"/>
+    <Method name="init"/>
+    <Bug pattern="DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED"/>
+  </Match>
+  <Match>
+    <Class name="org.beigesoft.web.servlet.WebTest"/>
+    <Method name="doGet"/>
+    <Bug pattern="XSS_REQUEST_PARAMETER_TO_SERVLET_WRITER"/>
+  </Match>
+  <Match>
+    <Class name="org.beigesoft.android.ajetty.AJetty"/>
+    <Method name="onCreate"/>
+    <Bug pattern="REC_CATCH_EXCEPTION"/>
+  </Match>
+</FindBugsFilter>

@@ -2,7 +2,7 @@
   
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.eclipse.ajetty</groupId>
+  <groupId>com.github.demidenko05</groupId>
   <artifactId>a-jetty-all</artifactId>
   <version>1.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>

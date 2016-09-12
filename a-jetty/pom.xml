@@ -10,8 +10,19 @@
   <artifactId>a-jetty</artifactId>
   <packaging>apk</packaging>
   
-  <name>Jetty for Android.</name>
-  <description>Jetty adapted for Android.</description>
+  <name>A-Jetty for Android.</name>
+  <description>A-Jetty for Android. It is Jetty 9.2 adapted for Android
+   configured as minimum server with WebAppDeployer that can deploy ordinal WAR (JSP/JSTL must be precompeled into servlets)</description>
+  <url>http://www.beigesoft.org</url>
+
+  <inceptionYear>2016</inceptionYear>
+  
+  <developers>
+    <developer>
+      <id>demidenko05</id>
+      <name>Yury Demidenko</name>
+    </developer>
+  </developers>
   
   <licenses>
     <license>

@@ -315,11 +315,6 @@
   </licenses>
   
   <distributionManagement>
-    <site>
-      <id>beigesoft</id>
-      <name>beigesoft</name>
-      <url>http://www.beigesoft.org</url>
-    </site>
     <snapshotRepository>
       <id>ossrh</id>
       <url>https://oss.sonatype.org/content/repositories/snapshots</url>
@@ -331,9 +326,9 @@
   </distributionManagement>
   
   <scm>
+    <url>https://github.com/demidenko05/a-jetty-all.git</url>
     <connection>scm:git:git@github.com:demidenko05/a-jetty-all.git</connection>
     <developerConnection>scm:git:git@github.com:demidenko05/a-jetty-all.git</developerConnection>
-    <url>git@github.com:demidenko05/a-jetty-all.git</url>
     <tag>HEAD</tag>
   </scm>
 

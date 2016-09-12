@@ -14,8 +14,18 @@
   <name>WEB test application</name>
   
   <description>
-    Simple WEB-app to test servlets, JSP, JSTL, UTF-8 I18N. 
+    Simple WEB-app for A-Jetty to test servlets, JSP, JSTL, UTF-8 I18N. 
   </description>
+  <url>http://www.beigesoft.org</url>
+
+  <inceptionYear>2016</inceptionYear>
+  
+  <developers>
+    <developer>
+      <id>demidenko05</id>
+      <name>Yury Demidenko</name>
+    </developer>
+  </developers>
 
   <profiles>
     <profile>

@@ -73,7 +73,7 @@
             <debug>true</debug>
           </run>
           <sdk>
-            <platform>19</platform>
+            <platform>24</platform>
           </sdk>
           <undeployBeforeDeploy>true</undeployBeforeDeploy>
           <extractDuplicates>true</extractDuplicates>

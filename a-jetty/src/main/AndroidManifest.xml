@@ -12,7 +12,7 @@
     android:versionName="1.0">
 
   <uses-sdk
-    android:minSdkVersion="11"
+    android:minSdkVersion="16"
     android:targetSdkVersion="24"/>
 
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
@@ -20,7 +20,7 @@
   <uses-permission android:name="android.permission.INTERNET"/>
 
   <application
-    android:name="org.beigesoft.android.app.ApplicationPlus"
+    android:name="org.beigesoft.android.ajetty.ApplicationPlus"
     android:allowBackup="true"
     android:icon="@drawable/ic_launcher"
     android:label="@string/app_name"

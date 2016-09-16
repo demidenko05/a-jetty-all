@@ -15,7 +15,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
+import java.util.Map;
+import java.lang.reflect.Method;
 
+import android.content.ContextWrapper;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.AssetManager;
@@ -29,8 +32,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.net.Uri;
+import android.Manifest;
+import android.content.pm.PackageManager;
 
-import org.beigesoft.android.app.ApplicationPlus;
 import org.beigesoft.ajetty.BootStrap;
 
 /**
@@ -39,6 +44,11 @@ import org.beigesoft.ajetty.BootStrap;
  * @author Yury Demidenko
  */
 public class AJetty extends Activity implements OnClickListener {
+
+  /**
+   * <p>Permissions request.</p>
+   **/
+  public static final int PERMISSIONS_REQUESTS = 2416;
 
   /**
    * <p>JETTY BASE dir.</p>
@@ -61,6 +71,11 @@ public class AJetty extends Activity implements OnClickListener {
   private Button btnStop;
 
   /**
+   * <p>Button start browser.</p>
+   **/
+  private Button btnStartBrowser;
+
+  /**
    * <p>EditText Port.</p>
    **/
   private EditText etPort;
@@ -71,9 +86,9 @@ public class AJetty extends Activity implements OnClickListener {
   private TextView tvStatus;
 
   /**
-   * <p>TextView link.</p>
+   * <p>Application beans map reference to lock.</p>
    **/
-  private TextView tvLink;
+  private Map<String, Object> beansMap;
 
   /**
    * <p>Called when the activity is first created or recreated.</p>
@@ -82,10 +97,38 @@ public class AJetty extends Activity implements OnClickListener {
   @Override
   public final void onCreate(final Bundle pSavedInstanceState) {
     super.onCreate(pSavedInstanceState);
+    //Only way to publish this project in central Maven repository
+    //cause missing Google dependencies:
+    if (android.os.Build.VERSION.SDK_INT >= 23) {
+      try {
+        Class[] argTypes = new Class[] {String.class};
+        Method checkSelfPermission = ContextWrapper.class
+          .getDeclaredMethod("checkSelfPermission", argTypes);
+        Object result = checkSelfPermission.invoke(getApplicationContext(),
+          Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        Integer chSlfPer = (Integer) result;
+        if (chSlfPer != PackageManager.PERMISSION_GRANTED) {
+          argTypes = new Class[] {String[].class, Integer.TYPE};
+          Method requestPermissions = Activity.class
+            .getDeclaredMethod("requestPermissions", argTypes);
+          String[] args = new String[]
+            {Manifest.permission.READ_EXTERNAL_STORAGE,
+              Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.INTERNET};
+          requestPermissions.invoke(this, (Object) args,
+            PERMISSIONS_REQUESTS);
+        }
+      } catch (Exception x) {
+          x.printStackTrace();
+      }
+    }
+    ApplicationPlus appPlus = (ApplicationPlus) getApplicationContext();
+    this.beansMap = appPlus.getBeansMap();
     setContentView(R.layout.ajetty);
     this.tvStatus = (TextView) findViewById(R.id.tvStatus);
-    this.tvLink = (TextView) findViewById(R.id.tvLink);
     this.etPort = (EditText) findViewById(R.id.etPort);
+    this.btnStartBrowser = (Button) findViewById(R.id.btnStartBrowser);
+    this.btnStartBrowser.setOnClickListener(this);
     this.btnStart = (Button) findViewById(R.id.btnStart);
     this.btnStop = (Button) findViewById(R.id.btnStop);
     this.btnStart.setOnClickListener(this);
@@ -125,9 +168,20 @@ public class AJetty extends Activity implements OnClickListener {
   @Override
   public final void onClick(final View pTarget) {
     if (pTarget == this.btnStart) {
-      startService(new Intent(JettyService.ACTION_START));
+      this.btnStart.setEnabled(false);
+      Toast.makeText(getApplicationContext(),
+        "Sending request to start server, please wait", Toast.LENGTH_SHORT)
+          .show();
+      Intent intent = new Intent(this, JettyService.class);
+      intent.setAction(JettyService.ACTION_START);
+      startService(intent);
     } else if (pTarget == this.btnStop) {
-      startService(new Intent(JettyService.ACTION_STOP));
+      this.btnStop.setEnabled(false);
+      Intent intent = new Intent(this, JettyService.class);
+      intent.setAction(JettyService.ACTION_STOP);
+      startService(intent);
+    } else if (pTarget == this.btnStartBrowser) {
+      startBrowser();
     }
   }
 
@@ -153,7 +207,7 @@ public class AJetty extends Activity implements OnClickListener {
   public final void onPause() {
     this.isNeedsToRefresh = false;
     try {
-      Thread.sleep(100);
+      Thread.sleep(1000);
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
@@ -161,24 +215,38 @@ public class AJetty extends Activity implements OnClickListener {
   }
 
   /**
+   * <p>Start browser.</p>
+   */
+  private void startBrowser() {
+    String url = "http://localhost:8080";
+    Intent i = new Intent(Intent.ACTION_VIEW);
+    i.setData(Uri.parse(url));
+    startActivity(i);
+  }
+
+  /**
    * <p>Refresh view.</p>
    */
   private void refreshView() {
-    BootStrap bootStrap = getOrInitBootStrap();
-    if (bootStrap.getIsStarted()) {
-      this.btnStart.setEnabled(false);
-      this.btnStop.setEnabled(true);
-      this.tvStatus.setText(getResources().getString(R.string.started));
-      String text = "You can type in browser: http://localhost:"
-        + String.valueOf(bootStrap.getPort());
-      this.tvLink.setText(text);
-    } else {
-      this.btnStart.setEnabled(true);
-      this.btnStop.setEnabled(false);
-      this.tvStatus.setText(getResources().getString(R.string.stopped));
-      this.tvLink.setText("");
+    synchronized (this.beansMap) {
+      BootStrap bootStrap = getOrInitBootStrap();
+      if (bootStrap.getIsStarted()) {
+        this.btnStart.setEnabled(false);
+        this.btnStop.setEnabled(true);
+        this.tvStatus.setText(getResources().getString(R.string.started));
+        this.btnStartBrowser.setEnabled(true);
+        String text = "http://localhost:"
+          + String.valueOf(bootStrap.getPort());
+        this.btnStartBrowser.setText(text);
+      } else {
+        this.btnStart.setEnabled(true);
+        this.btnStop.setEnabled(false);
+        this.tvStatus.setText(getResources().getString(R.string.stopped));
+        this.btnStartBrowser.setEnabled(false);
+        this.btnStartBrowser.setText("");
+      }
+      this.etPort.setText(String.valueOf(bootStrap.getPort()));
     }
-    this.etPort.setText(String.valueOf(bootStrap.getPort()));
   }
 
   /**
@@ -187,8 +255,7 @@ public class AJetty extends Activity implements OnClickListener {
    */
   private BootStrap getOrInitBootStrap() {
     BootStrap bootStrap = null;
-    ApplicationPlus appPlus = (ApplicationPlus) getApplicationContext();
-    Object bootStrapO = appPlus.getBeansMap()
+    Object bootStrapO = this.beansMap
       .get(BootStrap.class.getCanonicalName());
     if (bootStrapO != null) {
       bootStrap = (BootStrap) bootStrapO;
@@ -205,8 +272,10 @@ public class AJetty extends Activity implements OnClickListener {
       } catch (Exception e) {
         e.printStackTrace();
       }
-      appPlus.getBeansMap()
-        .put(BootStrap.class.getCanonicalName(), bootStrap);
+      synchronized (this.beansMap) {
+        this.beansMap
+          .put(BootStrap.class.getCanonicalName(), bootStrap);
+      }
     }
     return bootStrap;
   }

@@ -46,7 +46,7 @@
     <dependency>
       <groupId>com.github.demidenko05</groupId>
       <artifactId>a-apache-jsp</artifactId>
-      <version>1.0.3-SNAPSHOT</version>
+      <version>1.0.3</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>

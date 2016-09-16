@@ -46,22 +46,22 @@
     <dependency>
       <groupId>com.github.demidenko05</groupId>
       <artifactId>a-apache-jsp</artifactId>
-      <version>1.0.3-SNAPSHOT</version>
+      <version>1.0.3</version>
     </dependency>
     <dependency>
       <groupId>com.github.demidenko05</groupId>
       <artifactId>taglibs-standard-spec</artifactId>
-      <version>1.0.3-SNAPSHOT</version>
+      <version>1.0.3</version>
     </dependency>
     <dependency>
       <groupId>com.github.demidenko05</groupId>
       <artifactId>taglibs-standard-impl</artifactId>
-      <version>1.0.3-SNAPSHOT</version>
+      <version>1.0.3</version>
     </dependency>
     <dependency>
       <groupId>com.github.demidenko05</groupId>
       <artifactId>a-javabeans</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.4</version>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>

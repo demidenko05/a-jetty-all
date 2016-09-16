@@ -290,11 +290,11 @@
     </plugins>
   </build>
 
-  <contributors>
-    <contributor>
-      <name>Yury Demidenko</name>
-    </contributor>
-  </contributors>
+  <developers>
+    <developer><name>Aki Yoshida</name></developer>
+    <developer><name>Greg Wilkins</name></developer>
+    <developer><name>Yury Demidenko</name></developer>
+  </developers>
 
   <licenses>
     <license>

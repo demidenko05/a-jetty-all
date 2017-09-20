@@ -35,11 +35,10 @@
       android:layout_weight="1"
       android:text="@string/port" />
     
-    <EditText
-      android:id="@+id/etPort"
+    <Spinner
+      android:id="@+id/cmbPort"
       android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
-      android:inputType="number" />
+      android:layout_height="wrap_content" />
   </LinearLayout>
 
   <Button

@@ -47,6 +47,56 @@
     <java.version>1.7</java.version>
   </properties>
 
+  <profiles>
+    <profile>
+      <id>sign</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jarsigner-plugin</artifactId>
+            <version>1.4</version>
+            <executions>
+              <execution>
+                <id>signing</id>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+                <phase>package</phase>
+                <inherited>true</inherited>
+                <configuration>
+                  <archiveDirectory />
+                  <includes>
+                    <include>target/*.apk</include>
+                  </includes>
+                  <!--<keystore>path/to/keystore</keystore> default-->
+                  <storepass>${signpass}</storepass>
+                  <keypass>${signpass}</keypass>
+                  <alias>bsf-key</alias>
+                  <arguments>
+                    <argument>-sigalg</argument><argument>MD5withRSA</argument>
+                    <argument>-digestalg</argument><argument>SHA1</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>com.simpligility.maven.plugins</groupId>
+            <artifactId>android-maven-plugin</artifactId>
+            <version>4.4.2</version>
+            <inherited>true</inherited>
+            <configuration>
+                <sign>
+                    <debug>false</debug>
+                </sign>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
   <dependencies>
     <dependency>
       <groupId>com.google.android</groupId>
@@ -74,6 +124,7 @@
           </run>
           <sdk>
             <platform>24</platform>
+            <buildTools>23.0.3</buildTools>
           </sdk>
           <undeployBeforeDeploy>true</undeployBeforeDeploy>
           <extractDuplicates>true</extractDuplicates>

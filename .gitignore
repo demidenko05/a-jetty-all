@@ -10,3 +10,5 @@ release.properties
 /maven-central-deploy.log
 /maven-central-deploy.sh~
 *.releaseBackup
+*/findbug-exclude.xml
+*.log

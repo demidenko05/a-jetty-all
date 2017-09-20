@@ -1,13 +1,15 @@
 package org.beigesoft.ajetty;
 
 /*
- * Beigesoft ™
+ * Copyright (c) 2015-2017 Beigesoft ™
  *
- * Licensed under the Apache License, Version 2.0
+ * Licensed under the GNU General Public License (GPL), Version 2.0
+ * (the "License");
+ * you may not use this file except in compliance with the License.
  *
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
  */
 
 import java.io.File;
@@ -16,9 +18,6 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.webapp.WebAppContext;
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.handler.ShutdownHandlerSimple;
-import org.eclipse.jetty.server.handler.HandlerCollection;
 
 import org.beigesoft.afactory.IFactoryAppBeans;
 
@@ -36,14 +35,14 @@ import org.beigesoft.afactory.IFactoryAppBeans;
 public class BootStrapEmbedded {
 
   /**
-   * <p>Factory app-beans.</p>
+   * <p>Factory app-beans - only for WEB-app class loader.</p>
    **/
   private IFactoryAppBeans factoryAppBeans;
 
   /**
    * <p>Port.</p>
    **/
-  private int port = 8080;
+  private Integer port = 8080;
 
   /**
    * <p>Web.</p>
@@ -54,6 +53,16 @@ public class BootStrapEmbedded {
    * <p>Jetty.</p>
    **/
   private Server server;
+
+  /**
+   * <p>Jetty connector.</p>
+   **/
+  private ServerConnector connector;
+
+  /**
+   * <p>Host IP address.</p>
+   **/
+  private String hostAddress = "127.0.0.1";
 
   /**
    * <p>Webapp context.</p>
@@ -67,16 +76,13 @@ public class BootStrapEmbedded {
 
   /**
    * <p>Create and configure server.</p>
-   * @param pIsCreateShutdownHandler - Is Create Shutdown Handler
    * @throws Exception an Exception
    **/
-  public final void createServer(
-    final boolean pIsCreateShutdownHandler) throws Exception {
+  public final void createServer() throws Exception {
     this.server = new Server();
-    ServerConnector connector = new ServerConnector(server);
-    connector.setPort(this.port);
-    connector.setHost("127.0.0.1");
-    server.setConnectors(new Connector[]{connector});
+    this.connector = new ServerConnector(server);
+    this.connector.setHost(this.hostAddress);
+    this.server.setConnectors(new Connector[] {this.connector});
     File webappdir = new File(getWebAppPath());
     if (!webappdir.exists() || !webappdir.isDirectory()) {
       throw new Exception("Web app directory not found: " + getWebAppPath());
@@ -86,14 +92,7 @@ public class BootStrapEmbedded {
     this.webAppContext.setFactoryAppBeans(getFactoryAppBeans());
     this.webAppContext.setDefaultsDescriptor(webappdir
       .getAbsolutePath() + File.separator + "webdefault.xml");
-    if (pIsCreateShutdownHandler) {
-      HandlerCollection handlers = new HandlerCollection();
-      handlers.setHandlers(new Handler[] {this.webAppContext,
-        new ShutdownHandlerSimple(this.server)});
-      this.server.setHandler(handlers);
-    } else {
-      this.server.setHandler(this.webAppContext);
-    }
+    this.server.setHandler(this.webAppContext);
   }
 
 
@@ -102,6 +101,7 @@ public class BootStrapEmbedded {
    * @throws Exception an Exception
    **/
   public final void startServer() throws Exception {
+    this.connector.setPort(this.port);
     this.server.start();
     this.isStarted = true;
   }
@@ -142,9 +142,8 @@ public class BootStrapEmbedded {
       }
       bootStrap.setFactoryAppBeans(new FactoryAppBeansEmbedded());
       //Only for standard JAVA:
-      bootStrap.createServer(true);
+      bootStrap.createServer();
       bootStrap.startServer(); //server started in current thread
-      // stop it by send GET or POST /shutdown
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -153,9 +152,9 @@ public class BootStrapEmbedded {
   //Simple getters and setters:
   /**
    * <p>Getter for port.</p>
-   * @return int
+   * @return Integer
    **/
-  public final int getPort() {
+  public final Integer getPort() {
     return this.port;
   }
 
@@ -163,7 +162,7 @@ public class BootStrapEmbedded {
    * <p>Setter for port.</p>
    * @param pPort reference
    **/
-  public final void setPort(final int pPort) {
+  public final void setPort(final Integer pPort) {
     this.port = pPort;
   }
 
@@ -176,11 +175,11 @@ public class BootStrapEmbedded {
   }
 
   /**
-   * <p>Setter for server.</p>
-   * @param pServer reference
+   * <p>Getter for connector.</p>
+   * @return ServerConnector
    **/
-  public final void setServer(final Server pServer) {
-    this.server = pServer;
+  public final ServerConnector getConnector() {
+    return this.connector;
   }
 
   /**
@@ -189,14 +188,6 @@ public class BootStrapEmbedded {
    **/
   public final boolean getIsStarted() {
     return this.isStarted;
-  }
-
-  /**
-   * <p>Setter for isStarted.</p>
-   * @param pIsStarted reference
-   **/
-  public final void setIsStarted(final boolean pIsStarted) {
-    this.isStarted = pIsStarted;
   }
 
   /**
@@ -241,10 +232,18 @@ public class BootStrapEmbedded {
   }
 
   /**
-   * <p>Setter for webAppContext.</p>
-   * @param pWebAppContext reference
+   * <p>Getter for hostAddress.</p>
+   * @return String
    **/
-  public final void setWebAppContext(final WebAppContext pWebAppContext) {
-    this.webAppContext = pWebAppContext;
+  public final String getHostAddress() {
+    return this.hostAddress;
+  }
+
+  /**
+   * <p>Setter for hostAddress.</p>
+   * @param pHostAddress reference
+   **/
+  public final void setHostAddress(final String pHostAddress) {
+    this.hostAddress = pHostAddress;
   }
 }

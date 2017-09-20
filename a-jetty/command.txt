@@ -1,4 +1,0 @@
-java -jar jetty-runner.jar --stop-port 8181 --stop-key abc123
-java -jar start.jar --stop-port 8181 --stop-key abc123 --stop
-
-$ANDROID_HOME/tools/lint --html target/lint.html --sources src/main --classpath target .

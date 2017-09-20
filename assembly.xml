@@ -10,49 +10,22 @@
   <includeSiteDirectory>false</includeSiteDirectory>
   <fileSets>
     <fileSet>
+      <useDefaultExcludes>false</useDefaultExcludes>
       <includes>
-        <include>/src/**</include>
+        <include>**/src/**</include>
         <include>/.gitignore</include>
-        <include>/README.txt</include>
-        <include>/license.txt</include>
-        <include>/pom.xml</include>
         <include>/assembly.xml</include>
-        <include>/command.txt</include>
         <include>/findbug-exclude.xml</include>
         <include>/checkstyle-suppressions.xml</include>
         <include>/maven-central-deploy.sh</include>
+        <include>/LICENSE</include>
+        <include>/README.txt</include>
+        <include>**/pom.xml</include>
+        <include>**/build.xml</include>
       </includes>
       <excludes>
         <exclude>**/src/uml/**</exclude>
       </excludes>
     </fileSet>
   </fileSets>
-  <moduleSets>
-    <moduleSet>
-      <includes>
-        <include>org.eclipse.ajetty:a-jetty-base</include>
-        <include>org.eclipse.ajetty:a-jetty</include>
-        <include>org.eclipse.ajetty:webapp-test</include>
-      </includes>
-      <sources>
-        <fileSets>
-           <fileSet>
-            <excludes>
-              <exclude>**/src/uml/**</exclude>
-              <exclude>target/**</exclude>
-              <exclude>gwt-unitCache/**</exclude>
-              <exclude>WebContent/**</exclude>
-              <exclude>.settings/**</exclude>
-              <exclude>.classpath</exclude>
-              <exclude>.project</exclude>
-              <exclude>**/*.jasper</exclude>
-              <exclude>**/jquery/**</exclude>
-              <exclude>**/trash/**</exclude>
-              <exclude>/findbug-exclude.xml</exclude>
-            </excludes>
-          </fileSet>
-        </fileSets>
-      </sources>
-    </moduleSet>
-  </moduleSets>
 </assembly>

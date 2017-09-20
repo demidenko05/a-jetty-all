@@ -1,13 +1,15 @@
 package org.beigesoft.ajetty;
 
 /*
- * Beigesoft ™
+ * Copyright (c) 2015-2017 Beigesoft ™
  *
- * Licensed under the Apache License, Version 2.0
+ * Licensed under the GNU General Public License (GPL), Version 2.0
+ * (the "License");
+ * you may not use this file except in compliance with the License.
  *
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
  */
 
 import java.io.File;
@@ -50,7 +52,7 @@ public class BootStrap {
   /**
    * <p>Port.</p>
    **/
-  private int port = 8080;
+  private Integer port = 8080;
 
   /**
    * <p>Jetty base.</p>
@@ -73,6 +75,16 @@ public class BootStrap {
   private DeploymentManager deploymentManager;
 
   /**
+   * <p>Jetty connector.</p>
+   **/
+  private ServerConnector connector;
+
+  /**
+   * <p>Host IP address.</p>
+   **/
+  private String hostAddress = "127.0.0.1";
+
+  /**
    * <p>Create and configure server.</p>
    * @throws Exception an Exception
    **/
@@ -82,10 +94,10 @@ public class BootStrap {
     // will be assigned that you can either look in the logs for the port,
     // or programmatically obtain it for use in test cases.
     this.server = new Server();
-    ServerConnector connector = new ServerConnector(server);
-    connector.setPort(this.port);
-    connector.setHost("127.0.0.1");
-    server.setConnectors(new Connector[]{connector});
+    this.connector = new ServerConnector(server);
+    this.connector.setPort(this.port);
+    this.connector.setHost(this.hostAddress);
+    this.server.setConnectors(new Connector[] {this.connector});
     // Handlers:
     HandlerCollection handlers = new HandlerCollection();
     DefaultHandler defaultHandler = new DefaultHandler();
@@ -95,8 +107,8 @@ public class BootStrap {
       defaultHandler }); // !!! defaultHandler must be second
     this.server.setHandler(handlers);
     // Create the deployment manager:
-    deploymentManager = new DeploymentManager();
-    deploymentManager.setContexts(contextHandlerCollection);
+    this.deploymentManager = new DeploymentManager();
+    this.deploymentManager.setContexts(contextHandlerCollection);
     WebAppProvider webAppProvider = new WebAppProvider();
     webAppProvider.setFactoryAppBeans(this.factoryAppBeans);
     webAppProvider.setMonitoredDirName(jettyBase + File.separator + "webapps");
@@ -106,7 +118,7 @@ public class BootStrap {
     PropertiesConfigurationManager confManager =
       new PropertiesConfigurationManager();
     webAppProvider.setConfigurationManager(confManager);
-    deploymentManager.addAppProvider(webAppProvider);
+    this.deploymentManager.addAppProvider(webAppProvider);
     this.server.addBean(deploymentManager);
   }
 
@@ -116,6 +128,7 @@ public class BootStrap {
    * @throws Exception an Exception
    **/
   public final void startServer() throws Exception {
+    this.connector.setPort(this.port);
     this.server.start();
     this.isStarted = true;
   }
@@ -159,7 +172,6 @@ public class BootStrap {
       // wait until the server is done executing.
       // See http://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html#join
       bootStrap.getServer().join();
-      bootStrap.setIsStarted(false);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -168,9 +180,9 @@ public class BootStrap {
   //Simple getters and setters:
   /**
    * <p>Getter for port.</p>
-   * @return int
+   * @return Integer
    **/
-  public final int getPort() {
+  public final Integer getPort() {
     return this.port;
   }
 
@@ -178,7 +190,7 @@ public class BootStrap {
    * <p>Setter for port.</p>
    * @param pPort reference
    **/
-  public final void setPort(final int pPort) {
+  public final void setPort(final Integer pPort) {
     this.port = pPort;
   }
 
@@ -207,11 +219,27 @@ public class BootStrap {
   }
 
   /**
-   * <p>Setter for server.</p>
-   * @param pServer reference
+   * <p>Getter for connector.</p>
+   * @return ServerConnector
    **/
-  public final void setServer(final Server pServer) {
-    this.server = pServer;
+  public final ServerConnector getConnector() {
+    return this.connector;
+  }
+
+  /**
+   * <p>Getter for hostAddress.</p>
+   * @return String
+   **/
+  public final String getHostAddress() {
+    return this.hostAddress;
+  }
+
+  /**
+   * <p>Setter for hostAddress.</p>
+   * @param pHostAddress reference
+   **/
+  public final void setHostAddress(final String pHostAddress) {
+    this.hostAddress = pHostAddress;
   }
 
   /**
@@ -220,14 +248,6 @@ public class BootStrap {
    **/
   public final boolean getIsStarted() {
     return this.isStarted;
-  }
-
-  /**
-   * <p>Setter for isStarted.</p>
-   * @param pIsStarted reference
-   **/
-  public final void setIsStarted(final boolean pIsStarted) {
-    this.isStarted = pIsStarted;
   }
 
   /**
@@ -253,14 +273,5 @@ public class BootStrap {
    **/
   public final DeploymentManager getDeploymentManager() {
     return this.deploymentManager;
-  }
-
-  /**
-   * <p>Setter for deploymentManager.</p>
-   * @param pDeploymentManager reference
-   **/
-  public final void setDeploymentManager(
-    final DeploymentManager pDeploymentManager) {
-    this.deploymentManager = pDeploymentManager;
   }
 }

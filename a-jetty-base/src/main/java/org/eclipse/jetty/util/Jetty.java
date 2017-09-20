@@ -30,7 +30,7 @@ public class Jetty
                 pkg.getImplementationVersion() != null)
             VERSION = pkg.getImplementationVersion();
         else
-            VERSION = System.getProperty("jetty.version", "9.2.z-SNAPSHOT");
+            VERSION = System.getProperty("jetty.version", "9.2.19.v20160908");
     }
 
     private Jetty()

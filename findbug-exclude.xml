@@ -4,6 +4,10 @@
   <Match>
     <Package name="~org\.eclipse.*"/>
   </Match>
+  <!-- All apache sources: -->
+  <Match>
+    <Package name="~org\.apache.*"/>
+  </Match>
   <!-- All android generated sources: -->
   <Match>
     <Class name="~.*R\$.*"/>
@@ -12,6 +16,10 @@
     <Class name="org.beigesoft.ajetty.FactoryWebAppClassLoaderStd"/>
     <Method name="create"/>
     <Bug pattern="DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED"/>
+  </Match>
+  <Match>
+    <Class name="org.beigesoft.ajetty.BootStrapEmbeddedSwing"/>
+    <Bug pattern="SE_BAD_FIELD_STORE"/>
   </Match>
   <Match>
     <Class name="org.beigesoft.ajetty.FactoryWebAppClassLoaderEmbedded"/>

@@ -1,13 +1,15 @@
 package org.beigesoft.android.ajetty;
 
 /*
- * Beigesoft ™
+ * Copyright (c) 2015-2017 Beigesoft ™
  *
- * Licensed under the Apache License, Version 2.0
+ * Licensed under the GNU General Public License (GPL), Version 2.0
+ * (the "License");
+ * you may not use this file except in compliance with the License.
  *
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
  */
 
 import java.util.Map;
@@ -43,15 +45,9 @@ public class JettyService extends Service {
   private Map<String, Object> beansMap;
 
   /**
-   * <p>Start Thread.</p>
+   * <p>Flag to avoid double invoke.</p>
    **/
-  private StartThread startThread;
-
-  /**
-   * <p>Stop Thread.</p>
-   **/
-  private StopThread stopThread;
-
+  private boolean isActionPerforming = false;
 
   /**
    * <p>on create.</p>
@@ -88,17 +84,17 @@ public class JettyService extends Service {
     String action = pIntent.getAction();
     if (action.equals(ACTION_START)) {
       synchronized (this) {
-        if (getStartThread() == null) {
+        if (!this.isActionPerforming) {
+          this.isActionPerforming = true;
           StartThread stThread = new StartThread();
-          setStartThread(stThread);
           stThread.start();
         }
       }
     } else if (action.equals(ACTION_STOP)) {
       synchronized (this) {
-        if (getStopThread() == null) {
+        if (!this.isActionPerforming) {
+          this.isActionPerforming = true;
           StopThread stThread = new StopThread();
-          setStopThread(stThread);
           stThread.start();
         }
       }
@@ -123,11 +119,13 @@ public class JettyService extends Service {
   }
 
   /**
-   * <p>Get BootStrap from app-context.</p>
+   * <p>Get BootStrapEmbedded from app-context.
+   * It invoked by start/stop threads.</p>
    * @return BootStrap BootStrap
    */
   private BootStrap getBootStrap() {
     BootStrap bootStrap = null;
+    // this.beansMap already synchronized
     Object bootStrapO = this.beansMap
       .get(BootStrap.class.getCanonicalName());
     if (bootStrapO != null) {
@@ -150,6 +148,11 @@ public class JettyService extends Service {
         BootStrap bootStrap = getBootStrap();
         if (bootStrap != null && !bootStrap.getIsStarted()) {
           try {
+            if (bootStrap.getServer() == null) {
+              bootStrap.createServer();
+              bootStrap.getDeploymentManager().getContextAttributes()
+                .setAttribute("android.content.Context", JettyService.this);
+            }
             bootStrap.startServer();
           } catch (Exception e) {
             e.printStackTrace();
@@ -157,7 +160,7 @@ public class JettyService extends Service {
         }
       }
       synchronized (JettyService.this) {
-        JettyService.this.setStartThread(null);
+        JettyService.this.isActionPerforming = false;
       }
     }
   };
@@ -175,7 +178,6 @@ public class JettyService extends Service {
         if (bootStrap != null && bootStrap.getIsStarted()) {
           try {
             bootStrap.stopServer();
-            bootStrap = null;
             JettyService.this.beansMap
               .remove(BootStrap.class.getCanonicalName());
           } catch (Exception e) {
@@ -184,7 +186,7 @@ public class JettyService extends Service {
         }
       }
       synchronized (JettyService.this) {
-        JettyService.this.setStopThread(null);
+        JettyService.this.isActionPerforming = false;
       }
     }
   };
@@ -207,34 +209,10 @@ public class JettyService extends Service {
   }
 
   /**
-   * <p>Getter for startThread.</p>
-   * @return StartThread
+   * <p>Getter for isActionPerforming.</p>
+   * @return boolean
    **/
-  public final StartThread getStartThread() {
-    return this.startThread;
-  }
-
-  /**
-   * <p>Setter for startThread.</p>
-   * @param pStartThread reference
-   **/
-  public final void setStartThread(final StartThread pStartThread) {
-    this.startThread = pStartThread;
-  }
-
-  /**
-   * <p>Getter for stopThread.</p>
-   * @return StopThread
-   **/
-  public final StopThread getStopThread() {
-    return this.stopThread;
-  }
-
-  /**
-   * <p>Setter for stopThread.</p>
-   * @param pStopThread reference
-   **/
-  public final void setStopThread(final StopThread pStopThread) {
-    this.stopThread = pStopThread;
+  public final boolean getIsActionPerforming() {
+    return this.isActionPerforming;
   }
 }

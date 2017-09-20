@@ -6,7 +6,7 @@
   <fileSets>
     <fileSet>
       <directory>${basedir}</directory>
-      <outputDirectory>jetty-xml</outputDirectory>
+      <outputDirectory>jetty</outputDirectory>
       <includes>
         <include>src/main/resources/org/eclipse/**</include>
       </includes>

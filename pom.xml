@@ -14,7 +14,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>1.7</java.version>
-    <project.version>1.0.1-SNAPSHOT</project.version>
+    <project.version>1.0.2-SNAPSHOT</project.version>
   </properties>
 
   <profiles>
@@ -84,50 +84,8 @@
             </executions>
             <configuration>
               <suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
-              <excludes>**/R.java,**/BuildConfig.java,**/eclipse/**</excludes>
+              <excludes>**/R.java,**/BuildConfig.java,**/apache/**,**/eclipse/**</excludes>
             </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.rat</groupId>
-            <artifactId>apache-rat-plugin</artifactId>
-            <version>0.11</version>
-            <configuration>
-              <excludes>
-                <exclude>command.txt</exclude>
-                <exclude>**/webdefault.xml</exclude>
-                <exclude>**/build.xml</exclude>
-                <exclude>maven-central-deploy.sh</exclude>
-                <exclude>checkstyle-suppressions.xml</exclude>
-                <exclude>assembly.xml</exclude>
-                <exclude>findbug-exclude.xml</exclude>
-                <exclude>**/MANIFEST.MF</exclude>
-                <exclude>**/site/**</exclude>
-                <exclude>**/res/**</exclude>
-                <exclude>**/uml/**</exclude>
-                <exclude>**/eclipse/**</exclude>
-                <exclude>**/assembly/**</exclude>
-                <exclude>**/config/**</exclude>
-                <exclude>**/*.properties</exclude>
-                <exclude>**/*.jsp</exclude>
-                <exclude>**/*.svg</exclude>
-                <exclude>**/*.js</exclude>
-                <exclude>**/*.css</exclude>
-                <exclude>**/*.db</exclude>
-                <exclude>**/*.sqlite</exclude>
-                <exclude>**/*.html</exclude>
-                <exclude>**/*.sql</exclude>
-                <exclude>**/.directory</exclude>
-              </excludes>
-            </configuration>
-            <executions>
-              <execution>
-              <id>rat</id>
-              <phase>verify</phase>
-              <goals>
-                <goal>check</goal>
-              </goals>
-              </execution>
-            </executions>
           </plugin>
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
@@ -154,9 +112,11 @@
               <printFailingErrors>true</printFailingErrors>
               <excludes>
                 <exclude>**/eclipse/**</exclude>
+                <exclude>**/apache/**</exclude>
                 <!--Rule:AvoidUsingHardCodedIP is wrong-->
                 <exclude>org/beigesoft/ajetty/BootStrap.java</exclude>
                 <exclude>org/beigesoft/ajetty/BootStrapEmbedded.java</exclude>
+                <exclude>org/beigesoft/ajetty/BootStrapEmbeddedSwing.java</exclude>
               </excludes>
             </configuration>
             <executions>
@@ -232,9 +192,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <version>2.7</version>
-        <configuration>
-          <overwrite>true</overwrite><!--to avoid odd owerriding -->
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -269,7 +226,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.4</version>
+        <version>3.0.0</version>
         <inherited>false</inherited>
         <configuration>
           <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
@@ -334,6 +291,7 @@
 
   <modules>
     <module>a-jetty-base</module>
+    <module>a-jetty-swing</module>
     <module>webapp-test</module>
     <module>a-jetty</module>
   </modules>

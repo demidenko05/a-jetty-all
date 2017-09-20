@@ -24,10 +24,10 @@ import javax.servlet.ServletContextListener;
 /**
  * IntrospectorCleaner
  *
- * Cleans a static cache of Methods held by ajava.beans.Introspector
+ * Cleans a static cache of Methods held by java.beans.Introspector
  * class when a context is undeployed.
  * 
- * @see ajava.beans.Introspector
+ * @see java.beans.Introspector
  */
 public class IntrospectorCleaner implements ServletContextListener
 {
@@ -36,8 +36,6 @@ public class IntrospectorCleaner implements ServletContextListener
     {
         
     }
-
-
 
     public void contextDestroyed(ServletContextEvent sce)
     {

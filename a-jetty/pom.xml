@@ -124,7 +124,6 @@
           </run>
           <sdk>
             <platform>24</platform>
-            <buildTools>23.0.3</buildTools>
           </sdk>
           <undeployBeforeDeploy>true</undeployBeforeDeploy>
           <extractDuplicates>true</extractDuplicates>

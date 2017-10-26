@@ -45,7 +45,7 @@
     <dependency>
       <groupId>com.github.demidenko05</groupId>
       <artifactId>a-jetty-base</artifactId>
-      <version>1.0.2-SNAPSHOT</version>
+      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>

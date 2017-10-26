@@ -6,7 +6,8 @@
   <artifactId>a-jetty-all</artifactId>
   <version>1.0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
-  
+  <inceptionYear>2016</inceptionYear>
+
   <name>A-Jetty is Jetty 9.2 adapted for Android.</name>  
   <description>A-Jetty is Jetty 9.2 adapted for Android, it can run precompiled JSP/JSTL.</description>
   <url>http://www.beigesoft.org</url>
@@ -14,7 +15,6 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>1.7</java.version>
-    <project.version>1.0.2-SNAPSHOT</project.version>
   </properties>
 
   <profiles>
@@ -38,20 +38,23 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.9.1</version>
+            <version>2.10.2</version>
             <executions>
               <execution>
                 <id>attach-javadocs</id>
                 <goals>
                   <goal>jar</goal>
                 </goals>
+                <configuration>
+                  <additionalparam>-Xdoclint:none</additionalparam>
+                </configuration>
               </execution>
             </executions>
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.5</version>
+            <version>1.6</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -59,6 +62,10 @@
                 <goals>
                   <goal>sign</goal>
                 </goals>
+                <configuration>
+                  <keyname>48E407CA</keyname>
+                  <passphraseServerId>48E407CA</passphraseServerId>
+                </configuration>
               </execution>
             </executions>
           </plugin>
@@ -188,6 +195,32 @@
   <build>
     <finalName>${project.artifactId}</finalName>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.10.2</version>
+        <configuration>
+          <additionalparam>-Xdoclint:none</additionalparam>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>1.6</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+            <configuration>
+              <keyname>48E407CA</keyname>
+              <passphraseServerId>48E407CA</passphraseServerId>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>

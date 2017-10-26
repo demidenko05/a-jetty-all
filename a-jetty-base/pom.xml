@@ -12,6 +12,7 @@
   <name>A-Jetty Base.</name>
   <description>A-Jetty Base can run on Android Java as well as on standard Java 7+ and it can run precompiled JSP/JSTL.</description>
   <url>http://www.beigesoft.org</url>
+  <inceptionYear>2016</inceptionYear>
 
   <contributors>
     <contributor>
@@ -62,12 +63,12 @@
     <dependency>
       <groupId>com.github.demidenko05</groupId>
       <artifactId>a-javabeans8</artifactId>
-      <version>1.0.1-SNAPSHOT</version>
+      <version>1.0.1</version>
     </dependency>
     <dependency>
       <groupId>org.beigesoft</groupId>
       <artifactId>beige-logging-base</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>

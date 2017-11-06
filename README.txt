@@ -29,9 +29,9 @@ It can performs precompiled by A-Tomcat JSP/JSTL.
 The best way of using A-Jetty is use it as embedded server in standalone WEB-application with precompiled JSP.
 See https://github.com/demidenko05/beige-software beige-accounting-ajetty and beige-accounting-android for example
 
-To make your WEB-app with JSP working on non-embedded Android A-Jetty (see example webtest-app) you should:
+To make your WEB-app with JSP working on non-embedded Android A-Jetty (see example  https://github.com/demidenko05/ajetty-webapp-test) you should:
 1. Install A-Tomcat, Apache Ant, Maven ... see https://github.com/demidenko05/a-tomcat-all
-2. Unpack WAR into [your-webapp-dir] and copy "a-jetty-all/webapp-test/build.xml" at parent folder
+2. Unpack WAR into [your-webapp-dir] and copy "ajetty-webapp-test/build.xml" at parent folder
 3. Precompile JSP to Java Servlets with Ant and A-Tomcat by run outside [your-webapp-dir]:
   $ANT_HOME/bin/ant -Dtomcat.home=$TOMCATA_HOME -Dwebapp.path=[your-webapp-dir]/
 4. Compile generated Java files and copy servlets configuration from generated_web.xml into web.xml

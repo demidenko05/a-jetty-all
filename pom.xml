@@ -299,7 +299,6 @@
   <modules>
     <module>a-jetty-base</module>
     <module>a-jetty-swing</module>
-    <module>webapp-test</module>
     <module>a-jetty</module>
   </modules>
   

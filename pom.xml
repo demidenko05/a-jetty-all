@@ -4,7 +4,7 @@
 
   <groupId>com.github.demidenko05</groupId>
   <artifactId>a-jetty-all</artifactId>
-  <version>1.0.2-SNAPSHOT</version>
+  <version>1.0.2</version>
   <packaging>pom</packaging>
   <inceptionYear>2016</inceptionYear>
 
@@ -289,7 +289,7 @@
     <url>https://github.com/demidenko05/a-jetty-all.git</url>
     <connection>scm:git:git@github.com:demidenko05/a-jetty-all.git</connection>
     <developerConnection>scm:git:git@github.com:demidenko05/a-jetty-all.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>a-jetty-all-1.0.2</tag>
   </scm>
 
   <modules>

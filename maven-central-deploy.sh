@@ -8,7 +8,7 @@ if ( [ "$REPLY" == "yes" ] ) then
   ssh-add ~/.ssh/demidenko05git
   ssh-add -l
   read -p "Enter paraphrase to sign APK: "
-  mvn -Darguments=-Dandroid.release=true -Dsignpass="$REPLY" release:clean release:prepare release:perform -B -e | tee maven-central-deploy.log
+  mvn -Darguments="-Dandroid.release=true -Dsignpass=$REPLY" release:clean release:prepare release:perform -B -e | tee maven-central-deploy.log
   ssh-add -D
 else
   echo 'Exit without deploy'

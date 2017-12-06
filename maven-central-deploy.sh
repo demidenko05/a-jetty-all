@@ -5,9 +5,9 @@
 read -p "Really deploy to maven cetral repository  (yes/no)? "
 
 if ( [ "$REPLY" == "yes" ] ) then
-  read -p "Enter paraphrase to sign APK: "
   ssh-add ~/.ssh/demidenko05git
   ssh-add -l
+  read -p "Enter paraphrase to sign APK: "
   mvn release:clean release:prepare release:perform -Dandroid.release=true -Dsignpass="$REPLY" -B -e | tee maven-central-deploy.log
   ssh-add -D
 else

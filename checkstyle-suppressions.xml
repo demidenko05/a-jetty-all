@@ -6,5 +6,5 @@
 
 <suppressions>
   <suppress checks="MagicNumberCheck"
-    files="BootStrap|BootStrapEmbedded|AJetty|JettyService"/>
+    files="BootStrap|BootStrapEmbedded|AJetty|JettyService|CryptoService"/>
 </suppressions>

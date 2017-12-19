@@ -22,11 +22,19 @@ import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.security.SecureRandom;
 import java.util.Date;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
+import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.cert.X509v1CertificateBuilder;
@@ -57,11 +65,69 @@ import org.bouncycastle.operator.OutputEncryptor;
 public class CryptoService implements ICryptoService {
 
   /**
+   * <p>I18N.</p>
+   **/
+  private ResourceBundle messages;
+
+  /**
+   * <p>Only constructor.</p>
+   **/
+  public CryptoService() {
+    try {
+      this.messages = ResourceBundle.getBundle("MessagesCrypto");
+    } catch (Exception e) {
+      try { // fix Android Java
+        Locale locale = new Locale("en", "US");
+        this.messages = ResourceBundle.getBundle("MessagesCrypto", locale);
+      } catch (Exception e1) {
+        e1.printStackTrace();
+      }
+    }
+  }
+
+  /**
+   * <p>Check if password strong.
+   * It implements logic:
+   * Password must be at least 15 letters and digits!
+   * 80% of them must be different!
+   * 3-5 of them must be digits!</p>
+   * @param pPassword Password
+   * @return NULL if strong, otherwise message.
+   **/
+  @Override
+  public final String isPasswordStrong(final char[] pPassword) {
+    String wrong = getMsg("WrongPassword");
+    if (pPassword == null || pPassword.length < 15) {
+      return wrong;
+    }
+    HashSet<Character> chars = new HashSet<Character>();
+    HashSet<Character> digits = new HashSet<Character>();
+    for (char ch : pPassword) {
+      if (!Character.isLetterOrDigit(ch)) {
+        return wrong;
+      }
+      if (Character.isDigit(ch)) {
+        digits.add(ch);
+      }
+      chars.add(ch);
+    }
+    double allLn = pPassword.length;
+    double distinctLn = chars.size();
+    if (distinctLn / allLn < 0.79999999999) {
+      return wrong;
+    }
+    if (digits.size() < 3 || digits.size() > 5) {
+      return wrong;
+    }
+    return null;
+  }
+
+  /**
    * <p>Generates RSA pair for HTTPS and file exchange,
    * then makes certificates for them,
    * then creates Key Store and save them into it.
    * Keystore name is ajettykeystore.[pAjettyIn]
-   * Validity period is 20 years since now.</p>
+   * Validity period is 10 years since now.</p>
    * <p>It uses standard aliases prefixes:
    * <ul>
    * <li>AJettyRoot[pAjettyIn] - root certificate alias</li>
@@ -96,29 +162,43 @@ public class CryptoService implements ICryptoService {
     kpGenRsa.initialize(2048, new SecureRandom());
     KeyPair kpFileExch = kpGenRsa.generateKeyPair();
     // generate certificates:
+    Calendar cal = Calendar.getInstance();
+    Date start = cal.getTime();
+    cal.add(Calendar.YEAR, 10);
+    Date end = cal.getTime();
       // root:
-    kpGenRsa.initialize(2048, new SecureRandom());
+    /*kpGenRsa.initialize(2048, new SecureRandom());
     KeyPair kpRoot = kpGenRsa.generateKeyPair();
-    X509Certificate rootCert = buildRootCert(kpRoot, pAjettyIn);
+    String x500dn = "CN=A-Jetty" + pAjettyIn
+      + " ROOT, OU=A-Jetty" + pAjettyIn + " ROOT, O=A-Jetty"
+        + pAjettyIn + " ROOT, C=RU";
+    X509Certificate rootCert = buildRootCert(kpRoot, x500dn, start, end);*/
       // CA:
     kpGenRsa.initialize(2048, new SecureRandom());
     KeyPair kpCa = kpGenRsa.generateKeyPair();
-    X509Certificate caCert = buildCaCert(kpCa.getPublic(),
-      kpRoot.getPrivate(), rootCert, pAjettyIn);
+    String x500dn = "CN=A-Jetty" + pAjettyIn
+      + " CA, OU=A-Jetty" + pAjettyIn + " CA, O=A-Jetty"
+        + pAjettyIn + " CA, C=RU";
+    //X509Certificate caCert = buildCaCert(kpCa.getPublic(),
+      //kpRoot.getPrivate(), rootCert, x500dn, start, end);
+    X509Certificate caCert = buildCaCertSelfSign(kpCa, x500dn, start, end);
       // HTTPS:
-    X509Certificate httpsCert = buildEndEntityCert(kpHttps.getPublic(),
-      kpCa.getPrivate(), caCert, 3, "A-Jetty" + pAjettyIn
-        + " HTTPS certificate");
+    x500dn = "CN=localhost, OU=A-Jetty" + pAjettyIn + " HTTPS, O=A-Jetty"
+        + pAjettyIn + " HTTPS, C=RU";
+    X509Certificate httpsCert = buildLocalhostHttpsCert(kpHttps.getPublic(),
+      kpCa.getPrivate(), caCert, 2, x500dn, start, end);
       // File exchanger:
+    x500dn = "CN=A-Jetty" + pAjettyIn
+      + " File Exchanger, OU=A-Jetty" + pAjettyIn + " File Exchanger, O=A-Jetty"
+        + pAjettyIn + " File Exchanger, C=RU";
     X509Certificate fileExchCert = buildEndEntityCert(kpFileExch.getPublic(),
-      kpCa.getPrivate(), caCert, 4, "A-Jetty" + pAjettyIn
-        + " File Exchanger certificate");
+      kpCa.getPrivate(), caCert, 3, x500dn, start, end);
     // save to keystore:
     OutputEncryptor encOut = new JcePKCSPBEOutputEncryptorBuilder(
       NISTObjectIdentifiers.id_aes256_CBC).setProvider("BC").build(pPassw);
-    PKCS12SafeBagBuilder rtCrtBagBld = new JcaPKCS12SafeBagBuilder(rootCert);
+    /*PKCS12SafeBagBuilder rtCrtBagBld = new JcaPKCS12SafeBagBuilder(rootCert);
     rtCrtBagBld.addBagAttribute(PKCS12SafeBag.friendlyNameAttribute,
-      new DERBMPString("AJettyRoot" + pAjettyIn));
+      new DERBMPString("AJettyRoot" + pAjettyIn));*/
     PKCS12SafeBagBuilder caCrtBagBld = new JcaPKCS12SafeBagBuilder(caCert);
     caCrtBagBld.addBagAttribute(PKCS12SafeBag.friendlyNameAttribute,
       new DERBMPString("AJettyCa" + pAjettyIn));
@@ -153,7 +233,7 @@ public class CryptoService implements ICryptoService {
     builder.addEncryptedData(new JcePKCSPBEOutputEncryptorBuilder(
       PKCSObjectIdentifiers.pbeWithSHAAnd128BitRC2_CBC).setProvider("BC")
         .build(pPassw), new PKCS12SafeBag[] {httpsCrBgBr.build(),
-          fileExchCrBgBr.build(), caCrtBagBld.build(), rtCrtBagBld.build()});
+          fileExchCrBgBr.build(), caCrtBagBld.build()});
     PKCS12PfxPdu pfx = builder.build(new JcePKCS12MacCalculatorBuilder(
       NISTObjectIdentifiers.id_sha256), pPassw);
     FileOutputStream pfxOut = null;
@@ -170,22 +250,33 @@ public class CryptoService implements ICryptoService {
   }
 
   /**
-   * <p>Build A-Jetty Root V1 certificate for 20 years.</p>
+   * <p>To override odd behavior standard I18N.</p>
+   * @param pKey key
+   * @return i18n message
+   **/
+  public final String getMsg(final String pKey) {
+    try {
+      return this.messages.getString(pKey);
+    } catch (Exception e) {
+      return "[" + pKey + "]";
+    }
+  }
+
+  /**
+   * <p>Build A-Jetty Root V1 certificate.</p>
    * @param pKpRoot Root key pair
    * @param pAjettyIn A-Jetty instance number.
+   * @param pX500dn X.500 distinguished name.
+   * @param pStart date from.
+   * @param pEnd date to.
    * @throws Exception an Exception
    * @return root certificate
    */
-  public final X509Certificate buildRootCert(
-    final KeyPair pKpRoot, final int pAjettyIn) throws Exception {
-    long msIn20years = 20 * 365 * 24 * 60 * 60 * 1000;
+  public final X509Certificate buildRootCert(final KeyPair pKpRoot,
+    final String pX500dn, final Date pStart, final Date pEnd) throws Exception {
     X509v1CertificateBuilder certBldr = new JcaX509v1CertificateBuilder(
-      new X500Name("CN=A-Jetty" + pAjettyIn + " Root Certificate"),
-        BigInteger.valueOf(1), //#1
-          new Date(System.currentTimeMillis()),
-            new Date(System.currentTimeMillis() + msIn20years),
-              new X500Name("CN=A-Jetty" + pAjettyIn + " Root Certificate"),
-                pKpRoot.getPublic());
+      new X500Name(pX500dn), BigInteger.valueOf(1), //#1
+        pStart, pEnd, new X500Name(pX500dn), pKpRoot.getPublic());
     ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA")
       .setProvider("BC").build(pKpRoot.getPrivate());
     return new JcaX509CertificateConverter().setProvider("BC")
@@ -198,29 +289,57 @@ public class CryptoService implements ICryptoService {
    * @param pCaPk CA PK
    * @param pRootSk root private key
    * @param pRootCert root certificate
-   * @param pAjettyIn A-Jetty instance number.
+   * @param pX500dn X.500 distinguished name.
+   * @param pStart date from.
+   * @param pEnd date to.
    * @throws Exception an Exception
    * @return CA certificate
    */
   public final X509Certificate buildCaCert(final PublicKey pCaPk,
     final PrivateKey pRootSk, final X509Certificate pRootCert,
-      final int pAjettyIn) throws Exception {
-    long msIn20years = 20 * 365 * 24 * 60 * 60 * 1000;
+      final String pX500dn, final Date pStart, final Date pEnd) throws Exception {
     X509v3CertificateBuilder certBldr = new JcaX509v3CertificateBuilder(
       pRootCert.getSubjectX500Principal(), BigInteger.valueOf(2), //#2
-        new Date(System.currentTimeMillis()),
-          new Date(System.currentTimeMillis() + msIn20years),
-            new X500Principal("CN=A-Jetty" + pAjettyIn + " CA Certificate"),
-              pCaPk);
+        pStart, pEnd, new X500Principal(pX500dn), pCaPk);
     JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
     certBldr.addExtension(Extension.authorityKeyIdentifier, false, extUtils
       .createAuthorityKeyIdentifier(pRootCert)).addExtension(Extension
       .subjectKeyIdentifier, false, extUtils.createSubjectKeyIdentifier(pCaPk))
-      .addExtension(Extension.basicConstraints, true, new BasicConstraints(0))
+      .addExtension(Extension.basicConstraints, true,
+        new BasicConstraints(Integer.MAX_VALUE))
       .addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage
       .digitalSignature | KeyUsage.keyCertSign | KeyUsage.cRLSign));
     ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA")
       .setProvider("BC").build(pRootSk);
+    return new JcaX509CertificateConverter().setProvider("BC")
+      .getCertificate(certBldr.build(signer));
+  }
+
+  /**
+   * <p>Build A-Jetty self signing CA intermediate V3 certificate
+   * to use for creating (signing) end entities certificates.</p>
+   * @param pKpCa CA key pair
+   * @param pX500dn X.500 distinguished name.
+   * @param pStart date from.
+   * @param pEnd date to.
+   * @throws Exception an Exception
+   * @return CA certificate
+   */
+  public final X509Certificate buildCaCertSelfSign(final KeyPair pKpCa,
+    final String pX500dn, final Date pStart, final Date pEnd) throws Exception {
+    X509v3CertificateBuilder certBldr = new JcaX509v3CertificateBuilder(
+      new X500Principal(pX500dn), BigInteger.valueOf(1), //#1
+        pStart, pEnd, new X500Principal(pX500dn), pKpCa.getPublic());
+    JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
+    certBldr.addExtension(Extension
+      .subjectKeyIdentifier, false, extUtils
+      .createSubjectKeyIdentifier(pKpCa.getPublic()))
+      .addExtension(Extension.basicConstraints, true,
+        new BasicConstraints(Integer.MAX_VALUE))
+      .addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage
+      .digitalSignature | KeyUsage.keyCertSign | KeyUsage.cRLSign));
+    ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA")
+      .setProvider("BC").build(pKpCa.getPrivate());
     return new JcaX509CertificateConverter().setProvider("BC")
       .getCertificate(certBldr.build(signer));
   }
@@ -231,19 +350,19 @@ public class CryptoService implements ICryptoService {
    * @param pCaSk CA private key
    * @param pCaCert CA certificate
    * @param pSn serial number
-   * @param pName entity name
+   * @param pX500dn X.500 distinguished name.
+   * @param pStart date from.
+   * @param pEnd date to.
    * @throws Exception an Exception
    * @return end user certificate
    */
   public final X509Certificate buildEndEntityCert(final PublicKey pEntityPk,
-    final PrivateKey pCaSk, final X509Certificate pCaCert,
-      final int pSn, final String pName) throws Exception {
-    long msIn20years = 20 * 365 * 24 * 60 * 60 * 1000;
+    final PrivateKey pCaSk, final X509Certificate pCaCert, final int pSn,
+      final String pX500dn, final Date pStart,
+        final Date pEnd) throws Exception {
     X509v3CertificateBuilder certBldr = new JcaX509v3CertificateBuilder(
       pCaCert.getSubjectX500Principal(), BigInteger.valueOf(pSn),
-        new Date(System.currentTimeMillis()),
-          new Date(System.currentTimeMillis() + msIn20years),
-            new X500Principal("CN=" + pName), pEntityPk);
+        pStart, pEnd, new X500Principal(pX500dn), pEntityPk);
     JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
     certBldr.addExtension(Extension.authorityKeyIdentifier, false, extUtils
       .createAuthorityKeyIdentifier(pCaCert)).addExtension(Extension
@@ -255,5 +374,60 @@ public class CryptoService implements ICryptoService {
       .setProvider("BC").build(pCaSk);
     return new JcaX509CertificateConverter().setProvider("BC")
       .getCertificate(certBldr.build(signer));
+  }
+
+  /**
+   * <p>Build localhost HTTPS V3 certificate.</p>
+   * @param pEntityPk entity PK
+   * @param pCaSk CA private key
+   * @param pCaCert CA certificate
+   * @param pSn serial number
+   * @param pX500dn X.500 distinguished name.
+   * @param pStart date from.
+   * @param pEnd date to.
+   * @throws Exception an Exception
+   * @return end user certificate
+   */
+  public final X509Certificate buildLocalhostHttpsCert(final PublicKey pEntityPk,
+    final PrivateKey pCaSk, final X509Certificate pCaCert, final int pSn,
+      final String pX500dn, final Date pStart,
+        final Date pEnd) throws Exception {
+    X509v3CertificateBuilder certBldr = new JcaX509v3CertificateBuilder(
+      pCaCert.getSubjectX500Principal(), BigInteger.valueOf(pSn),
+        pStart, pEnd, new X500Principal(pX500dn), pEntityPk);
+    JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
+    certBldr.addExtension(Extension.authorityKeyIdentifier, false, extUtils
+      .createAuthorityKeyIdentifier(pCaCert));
+    certBldr.addExtension(Extension.subjectKeyIdentifier, false, extUtils
+      .createSubjectKeyIdentifier(pEntityPk));
+    certBldr.addExtension(Extension.basicConstraints, true,
+      new BasicConstraints(false));
+    certBldr.addExtension(Extension.extendedKeyUsage, false,
+      new ExtendedKeyUsage(KeyPurposeId.id_kp_serverAuth));
+    GeneralName dns = new GeneralName(GeneralName.dNSName, "localhost");
+    GeneralName ip = new GeneralName(GeneralName.iPAddress, "127.0.0.1");
+    GeneralNames dnsIp = new GeneralNames(new GeneralName[] {dns, ip});
+    certBldr.addExtension(Extension.subjectAlternativeName, false, dnsIp);
+    ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA")
+      .setProvider("BC").build(pCaSk);
+    return new JcaX509CertificateConverter().setProvider("BC")
+      .getCertificate(certBldr.build(signer));
+  }
+
+  //Simple getters and setters:
+  /**
+   * <p>Getter for messages.</p>
+   * @return ResourceBundle
+   **/
+  public final ResourceBundle getMessages() {
+    return this.messages;
+  }
+
+  /**
+   * <p>Setter for messages.</p>
+   * @param pMessages reference
+   **/
+  public final void setMessages(final ResourceBundle pMessages) {
+    this.messages = pMessages;
   }
 }

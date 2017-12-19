@@ -22,6 +22,22 @@
     <Bug pattern="SE_BAD_FIELD_STORE"/>
   </Match>
   <Match>
+    <Class name="org.beigesoft.ajetty.BootStrapEmbeddedHttpsSwing"/>
+    <Bug pattern="SE_BAD_FIELD_STORE"/>
+  </Match>
+  <Match>
+    <Class name="org.beigesoft.ajetty.BootStrapEmbeddedSwing"/>
+    <Bug pattern="DM_EXIT"/>
+  </Match>
+  <Match>
+    <Class name="org.beigesoft.ajetty.BootStrapEmbeddedHttpsSwing"/>
+    <Bug pattern="DM_EXIT"/>
+  </Match>
+  <Match>
+    <Class name="org.beigesoft.ajetty.BootStrapEmbeddedHttpsSwing$1"/>
+    <Bug pattern="DM_EXIT"/>
+  </Match>
+  <Match>
     <Class name="org.beigesoft.ajetty.FactoryWebAppClassLoaderEmbedded"/>
     <Method name="create"/>
     <Bug pattern="DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED"/>

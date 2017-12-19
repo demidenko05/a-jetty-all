@@ -68,7 +68,7 @@
           <runOnlyAtExecutionRoot>false</runOnlyAtExecutionRoot>
           <archive>
             <manifest>
-              <mainClass>org.beigesoft.ajetty.BootStrapSwing</mainClass>
+              <mainClass>org.beigesoft.ajetty.BootStrapEmbeddedSwing</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>

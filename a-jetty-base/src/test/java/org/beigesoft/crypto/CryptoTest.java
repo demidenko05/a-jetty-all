@@ -64,10 +64,15 @@ import org.bouncycastle.pkcs.jcajce.JcePKCS12MacCalculatorBuilder;
 import org.bouncycastle.pkcs.jcajce.JcePKCSPBEInputDecryptorProviderBuilder;
 import org.bouncycastle.pkcs.jcajce.JcePKCSPBEOutputEncryptorBuilder;
 import org.bouncycastle.util.io.Streams;
+import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.digests.SHA1Digest;
 
 import org.beigesoft.ajetty.crypto.CryptoService;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 import org.junit.Test;
 
 /**
@@ -348,14 +353,18 @@ public class CryptoTest {
     BufferedInputStream bis = new BufferedInputStream(fisData);
     FileOutputStream fosEncryptedData = new FileOutputStream("bobs-pizza-nfs.encr");
     CipherOutputStream cous = new CipherOutputStream(fosEncryptedData, cipherAes);
+    Digest sha1 = new SHA1Digest();
     byte[] buffer = new byte[1024];
     int len;
     while ((len = bis.read(buffer)) >= 0) {
       cous.write(buffer, 0, len);
+      sha1.update(buffer, 0, buffer.length);
     };
     bis.close();
     cous.flush();
     cous.close();
+    byte[] digestOri = new byte[sha1.getDigestSize()];
+    sha1.doFinal(digestOri, 0);
     sigMk.initSign(bobSk, new SecureRandom());
     FileInputStream fisDataEncr = new FileInputStream("bobs-pizza-nfs.encr");
     bis = new BufferedInputStream(fisDataEncr);
@@ -394,6 +403,15 @@ public class CryptoTest {
         bis.close();
         cous.flush();
         cous.close();
+        bis = new BufferedInputStream(new FileInputStream("bobs-pizza-nfs-r.sqlite"));
+        sha1 = new SHA1Digest();
+        while ((len = bis.read(buffer)) >= 0) {
+          sha1.update(buffer, 0, buffer.length);
+        };
+        bis.close();
+        byte[] digestRec = new byte[sha1.getDigestSize()];
+        sha1.doFinal(digestRec, 0);
+        assertArrayEquals(digestOri, digestRec);
         Long takeMlSec = System.currentTimeMillis() - longStart;
         System.out.println("testRsaAesBcRealData RSA/AES takes to encrypt/decrypt/sign/verify milliseconds: " + takeMlSec);
       } else {
@@ -402,5 +420,30 @@ public class CryptoTest {
     } else {
       System.out.println("testRsaAesBcRealData Wrong signature SSK!!!");
     }
+  }
+
+  /**
+   * <p>Test password strong.<p>
+   **/
+  @Test
+  public void testPasswordStrong() {
+    char[] password = null;
+    String rez = this.cryptoService.isPasswordStrong(password);
+    assertNotNull(rez);
+    password = "".toCharArray();
+    rez = this.cryptoService.isPasswordStrong(password);
+    assertNotNull(rez);
+    password = "hhkjhkauwsy".toCharArray();
+    rez = this.cryptoService.isPasswordStrong(password);
+    assertNotNull(rez);
+    password = "gracailikiki213".toCharArray();
+    rez = this.cryptoService.isPasswordStrong(password);
+    assertNotNull(rez);
+    password = "gracioliFIkw213".toCharArray();
+    rez = this.cryptoService.isPasswordStrong(password);
+    assertNull(rez);
+    password = "SimilGrovTheBest12345".toCharArray();
+    rez = this.cryptoService.isPasswordStrong(password);
+    assertNull(rez);
   }
 }

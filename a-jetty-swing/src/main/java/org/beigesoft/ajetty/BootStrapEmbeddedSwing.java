@@ -1,7 +1,7 @@
 package org.beigesoft.ajetty;
 
 /*
- * Copyright (c) 2016 Beigesoft ™
+ * Copyright (c) 2017 Beigesoft ™
  *
  * Licensed under the GNU General Public License (GPL), Version 2.0
  * (the "License");
@@ -108,6 +108,7 @@ public class BootStrapEmbeddedSwing extends JFrame implements ActionListener {
    * @throws Exception any
    **/
   public BootStrapEmbeddedSwing() throws Exception {
+    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     // Interface:
     URL iconURL = getClass().getResource("/favicon.png");
     ImageIcon icon = new ImageIcon(iconURL);
@@ -245,10 +246,15 @@ public class BootStrapEmbeddedSwing extends JFrame implements ActionListener {
   public static final void main(final String[] pArgs) {
     java.awt.EventQueue.invokeLater(new Runnable() {
       public void run() {
+        BootStrapEmbeddedSwing bses = null;
         try {
-          new BootStrapEmbeddedSwing().setVisible(true);
+          bses = new BootStrapEmbeddedSwing();
+          bses.setVisible(true);
         } catch (Exception ex) {
           ex.printStackTrace();
+          if (bses != null) {
+            bses.dispose();
+          }
         }
       }
     });
@@ -293,7 +299,6 @@ public class BootStrapEmbeddedSwing extends JFrame implements ActionListener {
         }
         BootStrapEmbeddedSwing.this.setVisible(false);
         BootStrapEmbeddedSwing.this.dispose();
-        System.exit(0);
       }
     }
   };

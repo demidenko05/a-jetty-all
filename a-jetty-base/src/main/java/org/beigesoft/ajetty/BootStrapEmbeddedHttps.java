@@ -1,7 +1,7 @@
 package org.beigesoft.ajetty;
 
 /*
- * Copyright (c) 2016 Beigesoft ™
+ * Copyright (c) 2017 Beigesoft ™
  *
  * Licensed under the GNU General Public License (GPL), Version 2.0
  * (the "License");
@@ -16,8 +16,13 @@ import java.io.File;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 import org.beigesoft.afactory.IFactoryAppBeans;
 
@@ -32,7 +37,7 @@ import org.beigesoft.afactory.IFactoryAppBeans;
  *
  * @author Yury Demidenko
  */
-public class BootStrapEmbedded {
+public class BootStrapEmbeddedHttps {
 
   /**
    * <p>Factory app-beans - only for WEB-app class loader.</p>
@@ -42,7 +47,7 @@ public class BootStrapEmbedded {
   /**
    * <p>Port.</p>
    **/
-  private Integer port = 8080;
+  private Integer port = 8443;
 
   /**
    * <p>Web.</p>
@@ -53,11 +58,6 @@ public class BootStrapEmbedded {
    * <p>Jetty.</p>
    **/
   private Server server;
-
-  /**
-   * <p>Jetty connector.</p>
-   **/
-  private ServerConnector connector;
 
   /**
    * <p>Host IP address.</p>
@@ -75,19 +75,57 @@ public class BootStrapEmbedded {
   private boolean isStarted = false;
 
   /**
+   * <p>A-Jetty start (keystore) password.</p>
+   **/
+  private String password;
+
+  /**
+   * <p>Keystore file.</p>
+   **/
+  private File pkcs12File;
+
+  /**
+   * <p>A-Jetty start HTTPS alias.</p>
+   **/
+  private String httpsAlias;
+
+  /**
+   * <p>A-Jetty start HTTPS alias.</p>
+   **/
+  private String httpsPassword;
+
+  /**
    * <p>Create and configure server.</p>
    * @throws Exception an Exception
    **/
   public final void createServer() throws Exception {
     try {
-      this.server = new Server();
-      this.connector = new ServerConnector(server);
-      this.connector.setHost(this.hostAddress);
-      this.server.setConnectors(new Connector[] {this.connector});
       File webappdir = new File(getWebAppPath());
       if (!webappdir.exists() || !webappdir.isDirectory()) {
         throw new Exception("Web app directory not found: " + getWebAppPath());
       }
+      this.server = new Server();
+      SslContextFactory sslContextFactory = new SslContextFactory();
+      sslContextFactory.setKeyStorePath(this.pkcs12File.getAbsolutePath());
+      sslContextFactory.setKeyStorePassword(this.password);
+      sslContextFactory.setKeyStoreProvider("BC");
+      sslContextFactory.setKeyStoreType("PKCS12");
+      if (this.httpsPassword != null) {
+        sslContextFactory.setKeyManagerPassword(this.httpsPassword);
+      }
+      sslContextFactory.setCertAlias(this.httpsAlias);
+      HttpConfiguration httpsConf = new HttpConfiguration();
+      httpsConf.setSecureScheme("https");
+      httpsConf.setSecurePort(this.port);
+      httpsConf.setOutputBufferSize(32768);
+      httpsConf.addCustomizer(new SecureRequestCustomizer());
+      ServerConnector connector = new ServerConnector(server,
+        new SslConnectionFactory(sslContextFactory, "http/1.1"),
+          new HttpConnectionFactory(httpsConf));
+      connector.setHost(this.hostAddress);
+      connector.setPort(this.port);
+      connector.setIdleTimeout(500000);
+      server.setConnectors(new Connector[] {connector});
       this.webAppContext = new WebAppContext(webappdir
         .getAbsolutePath(), "/");
       this.webAppContext.setFactoryAppBeans(getFactoryAppBeans());
@@ -100,13 +138,12 @@ public class BootStrapEmbedded {
     }
   }
 
-
   /**
    * <p>Start server.</p>
    * @throws Exception an Exception
    **/
   public final void startServer() throws Exception {
-    this.connector.setPort(this.port);
+    createServer();
     this.server.start();
     this.isStarted = true;
   }
@@ -117,41 +154,9 @@ public class BootStrapEmbedded {
    **/
   public final void stopServer() throws Exception {
     this.server.stop();
+    this.server.destroy();
+    this.server = null;
     this.isStarted = false;
-  }
-
-  /**
-   * <p>This start preconfigured Jetty on non-Android OS.
-   * It may takes up to tho parameters: port and webAppPath.
-   * Example:
-   * <pre>
-   * java -jar a-jetty-base.jar
-   * or
-   * java -jar a-jetty-base.jar webAppPath=../my/webcrm
-   * or
-   * java -jar a-jetty-base.jar webAppPath=../my/webcrm port=8080
-   * </pre>
-   * </p>
-   * @param pArgs arguments
-   **/
-  public static final void main(final String[] pArgs) {
-    try {
-      BootStrapEmbedded bootStrap = new BootStrapEmbedded();
-      for (String arg : pArgs) {
-        if (arg.contains("port=")) {
-          String strPort = arg.replace("port=", "").trim();
-          bootStrap.setPort(Integer.parseInt(strPort));
-        } else if (arg.contains("webAppPath=")) {
-          bootStrap.setWebAppPath(arg.replace("webAppPath=", "").trim());
-        }
-      }
-      bootStrap.setFactoryAppBeans(new FactoryAppBeansEmbedded());
-      //Only for standard JAVA:
-      bootStrap.createServer();
-      bootStrap.startServer(); //server started in current thread
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
   }
 
   //Simple getters and setters:
@@ -177,14 +182,6 @@ public class BootStrapEmbedded {
    **/
   public final Server getServer() {
     return this.server;
-  }
-
-  /**
-   * <p>Getter for connector.</p>
-   * @return ServerConnector
-   **/
-  public final ServerConnector getConnector() {
-    return this.connector;
   }
 
   /**
@@ -250,5 +247,70 @@ public class BootStrapEmbedded {
    **/
   public final void setHostAddress(final String pHostAddress) {
     this.hostAddress = pHostAddress;
+  }
+
+  /**
+   * <p>Getter for password.</p>
+   * @return String
+   **/
+  public final String getPassword() {
+    return this.password;
+  }
+
+  /**
+   * <p>Setter for password.</p>
+   * @param pPassword reference
+   **/
+  public final void setPassword(final String pPassword) {
+    this.password = pPassword;
+  }
+
+
+  /**
+   * <p>Getter for pkcs12File.</p>
+   * @return File
+   **/
+  public final File getPkcs12File() {
+    return this.pkcs12File;
+  }
+
+  /**
+   * <p>Setter for pkcs12File.</p>
+   * @param pPkcs12File reference
+   **/
+  public final void setPkcs12File(final File pPkcs12File) {
+    this.pkcs12File = pPkcs12File;
+  }
+
+  /**
+   * <p>Getter for httpsAlias.</p>
+   * @return String
+   **/
+  public final String getHttpsAlias() {
+    return this.httpsAlias;
+  }
+
+  /**
+   * <p>Setter for httpsAlias.</p>
+   * @param pHttpsAlias reference
+   **/
+  public final void setHttpsAlias(final String pHttpsAlias) {
+    this.httpsAlias = pHttpsAlias;
+  }
+
+  /**
+   * <p>Getter for httpsPassword.</p>
+   * @return String
+   **/
+  public final String getHttpsPassword() {
+    return this.httpsPassword;
+  }
+
+  /**
+   * <p>Setter for httpsPassword.</p>
+   * @param pHttpsPassword reference
+   **/
+  public final void setHttpsPassword(final String pHttpsPassword) {
+    this.httpsPassword = pHttpsPassword;
   }
 }

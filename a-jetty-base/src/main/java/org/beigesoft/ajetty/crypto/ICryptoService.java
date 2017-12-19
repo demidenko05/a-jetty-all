@@ -16,13 +16,19 @@ package org.beigesoft.ajetty.crypto;
  * <p>It serves A-Jetty with encryption features.</p>
  */
 public interface ICryptoService {
+  /**
+   * <p>Check if password strong.</p>
+   * @param pPassword Password
+   * @return NULL if strong, otherwise message.
+   **/
+  String isPasswordStrong(char[] pPassword);
 
   /**
    * <p>Generates RSA pair for HTTPS and file exchange,
    * then makes certificates for them,
    * then creates Key Store and save them into it.
    * Keystore name is ajettykeystore.[pAjettyIn]
-   * Validity period is 20 years since now.</p>
+   * Validity period is 10 years since now.</p>
    * <p>It uses standard aliases prefixes:
    * <ul>
    * <li>AJettyRoot[pAjettyIn] - root certificate alias</li>

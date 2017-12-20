@@ -388,9 +388,8 @@ public class CryptoTest {
       bis.close();
       if (sigMk.verify(sigDt)) {
         cipherRsa.init(Cipher.DECRYPT_MODE, keyPairAlice.getPrivate());
-        cipherRsa.update(encryptedSsk);
-        byte[] decryptedSsk = cipherRsa.doFinal();
-        System.out.println("testRsaAesBcRealData Restore decrypted SSK with algorithm: " + sskAes.getAlgorithm());
+        byte[] decryptedSsk = cipherRsa.doFinal(encryptedSsk);
+        System.out.println("testRsaAesBcRealData Restore decrypted SSK size/algorithm: "  + decryptedSsk + "/" + sskAes.getAlgorithm());
         SecretKeySpec sskAesRec = new SecretKeySpec(decryptedSsk, sskAes.getAlgorithm());
         cipherAes.init(Cipher.DECRYPT_MODE, sskAesRec);
         fisDataEncr = new FileInputStream("bobs-pizza-nfs.encr");

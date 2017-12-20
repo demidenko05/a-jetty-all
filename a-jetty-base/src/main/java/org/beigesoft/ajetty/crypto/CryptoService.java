@@ -130,8 +130,9 @@ public class CryptoService implements ICryptoService {
    * Validity period is 10 years since now.</p>
    * <p>It uses standard aliases prefixes:
    * <ul>
-   * <li>AJettyRoot[pAjettyIn] - root certificate alias</li>
-   * <li>AJettyCA[pAjettyIn] - intermediate CA certificate alias</li>
+   * <li>AJettyRoot[pAjettyIn] - root certificate alias.
+   *  But all self-signed CA is version 3, so it's omitted.</li>
+   * <li>AJettyCA[pAjettyIn] - self -signed CA certificate alias V3.</li>
    * <li>AJettyHttps[pAjettyIn] - HTTPS certificate/private key alias</li>
    * <li>AJettyFileExch[pAjettyIn] - File exchanger certificate/private
    * key alias</li>
@@ -265,7 +266,6 @@ public class CryptoService implements ICryptoService {
   /**
    * <p>Build A-Jetty Root V1 certificate.</p>
    * @param pKpRoot Root key pair
-   * @param pAjettyIn A-Jetty instance number.
    * @param pX500dn X.500 distinguished name.
    * @param pStart date from.
    * @param pEnd date to.
@@ -297,7 +297,8 @@ public class CryptoService implements ICryptoService {
    */
   public final X509Certificate buildCaCert(final PublicKey pCaPk,
     final PrivateKey pRootSk, final X509Certificate pRootCert,
-      final String pX500dn, final Date pStart, final Date pEnd) throws Exception {
+      final String pX500dn, final Date pStart,
+        final Date pEnd) throws Exception {
     X509v3CertificateBuilder certBldr = new JcaX509v3CertificateBuilder(
       pRootCert.getSubjectX500Principal(), BigInteger.valueOf(2), //#2
         pStart, pEnd, new X500Principal(pX500dn), pCaPk);
@@ -388,10 +389,11 @@ public class CryptoService implements ICryptoService {
    * @throws Exception an Exception
    * @return end user certificate
    */
-  public final X509Certificate buildLocalhostHttpsCert(final PublicKey pEntityPk,
-    final PrivateKey pCaSk, final X509Certificate pCaCert, final int pSn,
-      final String pX500dn, final Date pStart,
-        final Date pEnd) throws Exception {
+  public final X509Certificate buildLocalhostHttpsCert(
+    final PublicKey pEntityPk, final PrivateKey pCaSk,
+      final X509Certificate pCaCert, final int pSn,
+        final String pX500dn, final Date pStart,
+          final Date pEnd) throws Exception {
     X509v3CertificateBuilder certBldr = new JcaX509v3CertificateBuilder(
       pCaCert.getSubjectX500Principal(), BigInteger.valueOf(pSn),
         pStart, pEnd, new X500Principal(pX500dn), pEntityPk);

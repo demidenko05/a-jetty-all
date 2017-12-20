@@ -22,6 +22,7 @@ import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.security.DataBaseLoginService;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 import org.beigesoft.afactory.IFactoryAppBeans;
@@ -95,16 +96,25 @@ public class BootStrapEmbeddedHttps {
   private String httpsPassword;
 
   /**
+   * <p>Database realm service.</p>
+   **/
+  private DataBaseLoginService dataBaseLoginService;
+
+  /**
    * <p>Create and configure server.</p>
    * @throws Exception an Exception
    **/
   public final void createServer() throws Exception {
     try {
+      if (this.dataBaseLoginService == null) {
+        this.dataBaseLoginService = new DataBaseLoginService("JDBCRealm");
+      }
       File webappdir = new File(getWebAppPath());
       if (!webappdir.exists() || !webappdir.isDirectory()) {
         throw new Exception("Web app directory not found: " + getWebAppPath());
       }
       this.server = new Server();
+      server.addBean(this.dataBaseLoginService);
       SslContextFactory sslContextFactory = new SslContextFactory();
       sslContextFactory.setKeyStorePath(this.pkcs12File.getAbsolutePath());
       sslContextFactory.setKeyStorePassword(this.password);
@@ -131,6 +141,7 @@ public class BootStrapEmbeddedHttps {
       this.webAppContext.setFactoryAppBeans(getFactoryAppBeans());
       this.webAppContext.setDefaultsDescriptor(webappdir
         .getAbsolutePath() + File.separator + "webdefault.xml");
+      this.webAppContext.setAttribute("JDBCRealm", this.dataBaseLoginService);
       this.server.setHandler(this.webAppContext);
     } catch (Exception e) {
       this.server = null;

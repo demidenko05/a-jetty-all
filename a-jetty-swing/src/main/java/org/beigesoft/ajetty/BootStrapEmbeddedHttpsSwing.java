@@ -286,6 +286,23 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
       if (pAe.getSource() == this.btStart
         && this.bootStrapEmbeddedHttps.getServer() == null) {
         if (!this.isActionPerforming) {
+          this.isActionPerforming = true;
+          if (this.ajettyIn == null) {
+            Long ajl = (Long) ftfAjettyIn.getValue();
+            if (ajl != null) {
+              try {
+                this.ajettyIn = Integer.parseInt(ajl.toString());
+              } catch (Exception e) {
+                e.printStackTrace();
+              }
+            }
+          }
+          if (this.organizationKeystore == null && this.ajettyIn == null) {
+            JOptionPane.showMessageDialog(this, getMsg("EnterAjettyNumber"),
+              getMsg("error"), JOptionPane.ERROR_MESSAGE);
+            this.isActionPerforming = false;
+            return;
+          }
           startAjetty();
         }
       } else if (pAe.getSource() == this.btStop
@@ -325,25 +342,6 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
    * @throws Exception an Exception
    **/
   public final void startAjetty() throws Exception {
-    this.isActionPerforming = true;
-    if (this.ajettyIn == null) {
-      Long ajl = (Long) ftfAjettyIn.getValue();
-      if (ajl != null) {
-        try {
-          this.ajettyIn = Integer.parseInt(ajl.toString());
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-    }
-    if (this.organizationKeystore == null && this.ajettyIn == null) {
-      String msg = getMsg("EnterAjettyNumber");
-      String title = getMsg("error");
-      JOptionPane.showMessageDialog(this, msg,
-        title, JOptionPane.ERROR_MESSAGE);
-      this.isActionPerforming = false;
-      return;
-    }
     char[] ksPassword = this.pfKeystorePw.getPassword();
     File pks12File;
     if (this.organizationKeystore != null) {
@@ -356,6 +354,7 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
       pks12File = new File(ksPath + File.separator
           + "ajettykeystore." + this.ajettyIn);
     }
+    KeyStore pkcs12Store = null;
     if (!pks12File.exists()) {
       char[] ksPasswordc = this.pfKeystorePwc.getPassword();
       boolean noMatch = false;
@@ -370,77 +369,58 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
         }
       }
       if (noMatch) {
-        String msg = getMsg("PasswordRepeatNoMatch");
-        String title = getMsg("error");
-        JOptionPane.showMessageDialog(this, msg,
-          title, JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(this, getMsg("PasswordRepeatNoMatch"),
+          getMsg("error"), JOptionPane.ERROR_MESSAGE);
         this.isActionPerforming = false;
         return;
       }
       String isPswStrRez = this.cryptoService
         .isPasswordStrong(ksPassword);
       if (isPswStrRez != null) {
-        String title = getMsg("error");
         JOptionPane.showMessageDialog(this, isPswStrRez,
-          title, JOptionPane.ERROR_MESSAGE);
+          getMsg("error"), JOptionPane.ERROR_MESSAGE);
         this.isActionPerforming = false;
         return;
       }
       this.cryptoService.createKeyStoreWithCredentials(pks12File
         .getParent(), this.ajettyIn, ksPassword);
       FileInputStream fis = null;
-      //Certificate certHttps = null;
-      //Certificate certRt = null;
       Certificate certCa = null;
       try {
-        KeyStore pkcs12Store = KeyStore.getInstance("PKCS12", "BC");
+        pkcs12Store = KeyStore.getInstance("PKCS12", "BC");
         fis = new FileInputStream(pks12File);
         pkcs12Store.load(fis, ksPassword);
-        //certHttps = pkcs12Store.getCertificate("AJettyHttps" + this.ajettyIn);
-        //certRt = pkcs12Store.getCertificate("AJettyRoot" + this.ajettyIn);
         certCa = pkcs12Store.getCertificate("AJettyCa" + this.ajettyIn);
-      } catch (Exception e) {
+      } finally {
         if (fis != null) {
          try {
            fis.close();
          } catch (Exception e2) {
            e2.printStackTrace();
-         } 
+         }
         }
       }
       if (certCa != null) {
         File pemFl = new File(pks12File.getParentFile().getParent()
           + File.separator + "ajetty-ca.pem");
-        OutputStreamWriter osw = null;
         JcaPEMWriter pemWriter = null;
         try {
-          osw = new OutputStreamWriter(new FileOutputStream(pemFl),
-            Charset.forName("ASCII").newEncoder());
+          OutputStreamWriter osw = new OutputStreamWriter(
+            new FileOutputStream(pemFl), Charset.forName("ASCII").newEncoder());
           pemWriter = new JcaPEMWriter(osw);
-          //pemWriter.writeObject(certHttps);
-          //pemWriter.writeObject(certRt);
           pemWriter.writeObject(certCa);
           pemWriter.flush();
-        } catch (Exception e) {
-          e.printStackTrace();
-          if (osw != null) {
-            try {
-              osw.close();
-            } catch (Exception e2) {
-              e2.printStackTrace();
-            } 
-          }
+        } finally {
           if (pemWriter != null) {
             try {
               pemWriter.close();
             } catch (Exception e2) {
               e2.printStackTrace();
-            } 
+            }
           }
         }
       }
     } else {
-      KeyStore pkcs12Store = null;
       FileInputStream fis = null;
       try {
         pkcs12Store = KeyStore.getInstance("PKCS12", "BC");
@@ -459,10 +439,8 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
         }
       }
       if (pkcs12Store == null) {
-        String msg = getMsg("passwordDoNotMatch");
-        String title = getMsg("error");
-        JOptionPane.showMessageDialog(this, msg,
-          title, JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(this, getMsg("passwordDoNotMatch"),
+          getMsg("error"), JOptionPane.ERROR_MESSAGE);
         this.isActionPerforming = false;
         return;
       }
@@ -482,10 +460,8 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
           PrivateKey httpsSk = pkEntry.getPrivateKey();
         } catch (Exception e) {
           this.bootStrapEmbeddedHttps.setHttpsPassword(null);
-          String msg = getMsg("SkpasswordDoNotMatch");
-          String title = getMsg("error");
-          JOptionPane.showMessageDialog(this, msg,
-            title, JOptionPane.ERROR_MESSAGE);
+          JOptionPane.showMessageDialog(this, getMsg("SkpasswordDoNotMatch"),
+            getMsg("error"), JOptionPane.ERROR_MESSAGE);
           e.printStackTrace();
           this.isActionPerforming = false;
           return;

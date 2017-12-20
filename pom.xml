@@ -121,6 +121,7 @@
                 <exclude>**/eclipse/**</exclude>
                 <exclude>**/apache/**</exclude>
                 <!--Rule:AvoidUsingHardCodedIP is wrong-->
+                <exclude>org/beigesoft/ajetty/crypto/CryptoService.java</exclude>
                 <exclude>org/beigesoft/ajetty/BootStrap.java</exclude>
                 <exclude>org/beigesoft/ajetty/BootStrapEmbedded.java</exclude>
                 <exclude>org/beigesoft/ajetty/BootStrapEmbeddedHttps.java</exclude>

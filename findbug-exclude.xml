@@ -57,4 +57,17 @@
     <Method name="onCreate"/>
     <Bug pattern="REC_CATCH_EXCEPTION"/>
   </Match>
+  <!--EI_EXPOSE_REP/2 is resource unfriendly approach to avoid object's unexpected changes.
+  In real program the most of objects (not only Date and arrays) is mutable.
+  These are also POJO-unfriendly rules.
+  Using annotation "immutable" is the best way to implements logic: "do not change
+  mutable object outside or better - by annotated allowChangeImmutableFor[]".-->
+  <Match>
+     <Class name="org.beigesoft.ajetty.UserCredentials" />
+     <Bug pattern="EI_EXPOSE_REP" />
+  </Match>
+  <Match>
+     <Class name="org.beigesoft.ajetty.UserCredentials" />
+     <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
 </FindBugsFilter>

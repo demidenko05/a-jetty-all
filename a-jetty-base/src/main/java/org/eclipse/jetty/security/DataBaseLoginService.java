@@ -19,12 +19,6 @@
 package org.eclipse.jetty.security;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -41,29 +35,16 @@ import org.beigesoft.ajetty.UserCredentials;
 
 /* ------------------------------------------------------------ */
 /**
- * HashMapped User Realm with DataBase as data source. 
- * The login() method checks the inherited Map for the user. If the user is not
- * found, it will fetch details from the database and populate the inherited
- * Map. It then calls the superclass login() method to perform the actual
- * authentication. Periodically (controlled by configuration parameter),
- * internal hashes are cleared. Caching can be disabled by setting cache refresh
- * interval to zero. Uses one database connection that is initialized at
- * startup. Reconnect on failures. authenticate() is 'synchronized'.
  * 
- * 
- * Based on JDBCLoginService.java
- * 
- * 
- * 
- * 
+ * It's based on JDBCLoginService.java
+ * It never caches DB data.
+ * ISrvGetUserCredentials is JDBC/Android database retriever.
  */
 
 public class DataBaseLoginService extends MappedLoginService
 {
   private static final Logger LOG = Log.getLogger(DataBaseLoginService.class);
 
-  protected int _cacheTime;
-  protected long _lastHashPurge;
 
   private ISrvGetUserCredentials srvGetUserCredentials;
 
@@ -86,33 +67,6 @@ public class DataBaseLoginService extends MappedLoginService
   {
       setName(name);
       setIdentityService(identityService);
-  }
-
-
-  /* ------------------------------------------------------------ */
-  /**
-   * @see org.eclipse.jetty.security.MappedLoginService#doStart()
-   */
-  @Override
-  protected void doStart() throws Exception
-  {
-      _cacheTime = 300000;
-      _lastHashPurge = 0;
-      super.doStart();
-  }
-
-  /* ------------------------------------------------------------ */
-  @Override
-  public UserIdentity login(String username, Object credentials)
-  {
-      long now = System.currentTimeMillis();
-      if (now - _lastHashPurge > _cacheTime || _cacheTime == 0)
-      {
-          _users.clear();
-          _lastHashPurge = now;
-      }
-      
-      return super.login(username,credentials);
   }
 
   /* ------------------------------------------------------------ */

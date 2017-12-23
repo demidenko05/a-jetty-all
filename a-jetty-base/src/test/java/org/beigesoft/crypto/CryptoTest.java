@@ -20,7 +20,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.util.Enumeration;
 import java.nio.charset.Charset;
-import java.security.Security;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -37,37 +36,10 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.CipherOutputStream;
 
-import org.bouncycastle.asn1.ASN1Encoding;
-import org.bouncycastle.asn1.DERBMPString;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.Attribute;
-import org.bouncycastle.asn1.pkcs.ContentInfo;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.operator.InputDecryptorProvider;
-import org.bouncycastle.operator.OutputEncryptor;
-import org.bouncycastle.operator.bc.BcDefaultDigestProvider;
-import org.bouncycastle.pkcs.PKCS12PfxPdu;
-import org.bouncycastle.pkcs.PKCS12PfxPduBuilder;
-import org.bouncycastle.pkcs.PKCS12SafeBag;
-import org.bouncycastle.pkcs.PKCS12SafeBagBuilder;
-import org.bouncycastle.pkcs.PKCS12SafeBagFactory;
-import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
-import org.bouncycastle.pkcs.bc.BcPKCS12MacCalculatorBuilderProvider;
-import org.bouncycastle.pkcs.jcajce.JcaPKCS12SafeBagBuilder;
-import org.bouncycastle.pkcs.jcajce.JcePKCS12MacCalculatorBuilder;
-import org.bouncycastle.pkcs.jcajce.JcePKCSPBEInputDecryptorProviderBuilder;
-import org.bouncycastle.pkcs.jcajce.JcePKCSPBEOutputEncryptorBuilder;
-import org.bouncycastle.util.io.Streams;
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-
+import org.beigesoft.ajetty.crypto.ICryptoService;
 import org.beigesoft.ajetty.crypto.CryptoService;
+import org.beigesoft.log.ILogger;
+import org.beigesoft.log.LoggerSimple;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -88,13 +60,33 @@ public class CryptoTest {
 
   private final char[] ksPassword = "Hhhl98Kl2983hkjhkj".toCharArray();
 
-  private CryptoService cryptoService = new CryptoService();
+  private ICryptoService cryptoService;
+  
+  private ILogger log;
 
-  public CryptoTest() throws Exception {
-    Security.addProvider(new BouncyCastleProvider());
-    File pks12File = new File("ajettykeystore.1");
-    if (!pks12File.exists()) {
-      this.cryptoService.createKeyStoreWithCredentials(null, 1, this.ksPassword);
+  private String ksPath;
+
+  private boolean isInit = false;
+
+  public void initIfNeed() throws Exception {
+    if (!isInit) {
+      if (this.cryptoService == null) {
+        this.cryptoService = new CryptoService();
+      }
+      this.cryptoService.init();
+      File pks12File;
+      if (this.ksPath == null) {
+        pks12File = new File("ajettykeystore.1");
+      } else {
+        pks12File = new File(this.ksPath + File.separator + "ajettykeystore.1");
+      }
+      if (!pks12File.exists()) {
+        this.cryptoService.createKeyStoreWithCredentials(this.ksPath, 1, this.ksPassword);
+      }
+      if (this.log == null) {
+        this.log = new LoggerSimple();
+      }
+      isInit = true;
     }
   }
 
@@ -113,9 +105,10 @@ public class CryptoTest {
    **/
   @Test
   public void testRsaFly() throws Exception {
+    initIfNeed();
     byte[] data = dataString.getBytes(this.charset);
-    System.out.println("Text : " + this.dataString);
-    System.out.println("Text data size: " + data.length);
+    this.log.info(null, CryptoTest.class,"Text : " + this.dataString);
+    this.log.info(null, CryptoTest.class,"Text data size: " + data.length);
     KeyPairGenerator kpGenRsa = KeyPairGenerator.getInstance("RSA");
     //They suggest to use pure new SecureRandom()
     //They - Bounce Castle last examples, https://android-developers.googleblog.com/2013/02/using-cryptography-to-store-credentials.html
@@ -128,12 +121,12 @@ public class CryptoTest {
       Cipher cipherRsa = Cipher.getInstance("RSA");
       cipherRsa.init(Cipher.ENCRYPT_MODE, keyPairAlice.getPublic());
       byte[] encryptedData = cipherRsa.doFinal(data);
-      System.out.println("Encrypted data size: " + encryptedData.length);
+      this.log.info(null, CryptoTest.class,"Encrypted data size: " + encryptedData.length);
       Signature sigMk = Signature.getInstance("SHA256withRSA");
       sigMk.initSign(keyPairBob.getPrivate(), new SecureRandom());
       sigMk.update(encryptedData);
       byte[] sigDt = sigMk.sign();
-      System.out.println("Signature size: " + sigDt.length);
+      this.log.info(null, CryptoTest.class,"Signature size: " + sigDt.length);
       // Alice has received data:
       sigMk.initVerify(keyPairBob.getPublic());
       sigMk.update(encryptedData);
@@ -143,9 +136,9 @@ public class CryptoTest {
         String received = new String(decryptedData, this.charset);
         assertEquals(this.dataString, received);
         Long takeMlSec = System.currentTimeMillis() - longStart;
-        System.out.println("RSA takes to encrypt/decrypt/sign/verify milliseconds: " + takeMlSec);
+        this.log.info(null, CryptoTest.class,"RSA takes to encrypt/decrypt/sign/verify milliseconds: " + takeMlSec);
       } else {
-        System.out.println("Wrong signature data!!!");
+        this.log.info(null, CryptoTest.class,"Wrong signature data!!!");
       }
     } catch (Exception e) {
       // for large data and key 2048 size it will be:
@@ -174,6 +167,7 @@ public class CryptoTest {
    **/
   @Test
   public void testRsaAesFly() throws Exception {
+    initIfNeed();
     KeyGenerator keyGenAes = KeyGenerator.getInstance("AES");
     keyGenAes.init(256, new SecureRandom());
     SecretKey sskAes = keyGenAes.generateKey();
@@ -189,24 +183,24 @@ public class CryptoTest {
     cipherRsa.init(Cipher.ENCRYPT_MODE, keyPairAlice.getPublic());
     cipherRsa.update(sskAes.getEncoded());
     byte[] encryptedSsk = cipherRsa.doFinal();
-    System.out.println("testRsaAesFly SSK size: " + sskAes.getEncoded().length);
-    System.out.println("testRsaAesFly Encrypted SSK size: " + encryptedSsk.length);
+    this.log.info(null, CryptoTest.class,"testRsaAesFly SSK size: " + sskAes.getEncoded().length);
+    this.log.info(null, CryptoTest.class,"testRsaAesFly Encrypted SSK size: " + encryptedSsk.length);
     Signature sigMk = Signature.getInstance("SHA256withRSA");
     sigMk.initSign(keyPairBob.getPrivate(), new SecureRandom());
     sigMk.update(encryptedSsk);
     byte[] sigSsk = sigMk.sign();
-    System.out.println("testRsaAesFly Signature SSK size: " + sigSsk.length);
+    this.log.info(null, CryptoTest.class,"testRsaAesFly Signature SSK size: " + sigSsk.length);
       //DATA:
     Cipher cipherAes = Cipher.getInstance("AES");
     cipherAes.init(Cipher.ENCRYPT_MODE, sskAes);
     byte[] data = dataString.getBytes(this.charset);
     //cipherAes.update(data); don't work
     byte[] encryptedData = cipherAes.doFinal(data);
-    System.out.println("testRsaAesFly Encrypted data size: " + encryptedData.length);
+    this.log.info(null, CryptoTest.class,"testRsaAesFly Encrypted data size: " + encryptedData.length);
     sigMk.initSign(keyPairBob.getPrivate(), new SecureRandom());
     sigMk.update(encryptedData);
     byte[] sigDt = sigMk.sign();
-    System.out.println("testRsaAesFly Signature data size: " + sigDt.length);
+    this.log.info(null, CryptoTest.class,"testRsaAesFly Signature data size: " + sigDt.length);
     // Alice has received data:
     sigMk.initVerify(keyPairBob.getPublic());
     sigMk.update(encryptedSsk);
@@ -217,19 +211,19 @@ public class CryptoTest {
         cipherRsa.init(Cipher.DECRYPT_MODE, keyPairAlice.getPrivate());
         cipherRsa.update(encryptedSsk);
         byte[] decryptedSsk = cipherRsa.doFinal();
-        System.out.println("testRsaAesFly Restore decrypted SSK with algorithm: " + sskAes.getAlgorithm());
+        this.log.info(null, CryptoTest.class,"testRsaAesFly Restore decrypted SSK with algorithm: " + sskAes.getAlgorithm());
         SecretKeySpec sskAesRec = new SecretKeySpec(decryptedSsk, sskAes.getAlgorithm());
         cipherAes.init(Cipher.DECRYPT_MODE, sskAesRec);
         byte[] decryptedData = cipherAes.doFinal(encryptedData);
         String received = new String(decryptedData, this.charset);
         assertEquals(this.dataString, received);
         Long takeMlSec = System.currentTimeMillis() - longStart;
-        System.out.println("testRsaAesFly RSA/AES takes to encrypt/decrypt/sign/verify milliseconds: " + takeMlSec);
+        this.log.info(null, CryptoTest.class,"testRsaAesFly RSA/AES takes to encrypt/decrypt/sign/verify milliseconds: " + takeMlSec);
       } else {
-        System.out.println("testRsaAesFly Wrong signature DATA!!!");
+        this.log.info(null, CryptoTest.class,"testRsaAesFly Wrong signature DATA!!!");
       }
     } else {
-      System.out.println("testRsaAesFly Wrong signature SSK!!!");
+      this.log.info(null, CryptoTest.class,"testRsaAesFly Wrong signature SSK!!!");
     }
   }
 
@@ -238,35 +232,41 @@ public class CryptoTest {
    **/
   @Test
   public void testRsaAesBc() throws Exception {
+    initIfNeed();
     // get Bob's keystore:
-    File pks12File = new File("ajettykeystore.1");
-    KeyStore pkcs12Store = KeyStore.getInstance("PKCS12", "BC");
+    File pks12File;
+    if (this.ksPath == null) {
+      pks12File = new File("ajettykeystore.1");
+    } else {
+      pks12File = new File(this.ksPath + File.separator + "ajettykeystore.1");
+    }
+    KeyStore pkcs12Store = KeyStore.getInstance("PKCS12", this.cryptoService.getProviderName());
     pkcs12Store.load(new FileInputStream(pks12File), this.ksPassword);
-    System.out.println("########## KeyStore Dump");
+    this.log.info(null, CryptoTest.class,"########## KeyStore Dump");
     for (Enumeration en = pkcs12Store.aliases(); en.hasMoreElements();) {
       String alias = (String)en.nextElement();
       if (pkcs12Store.isCertificateEntry(alias)) {
-          System.out.println("Certificate Entry: " + alias + ", Subject: " + (((X509Certificate)pkcs12Store.getCertificate(alias)).getSubjectDN()));
+          this.log.info(null, CryptoTest.class,"Certificate Entry: " + alias + ", Subject: " + (((X509Certificate)pkcs12Store.getCertificate(alias)).getSubjectDN()));
       } else if (pkcs12Store.isKeyEntry(alias)) {
-          System.out.println("Key Entry: " + alias + ", Subject: " + (((X509Certificate)pkcs12Store.getCertificate(alias)).getSubjectDN()));
+          this.log.info(null, CryptoTest.class,"Key Entry: " + alias + ", Subject: " + (((X509Certificate)pkcs12Store.getCertificate(alias)).getSubjectDN()));
       }
     }
-    KeyGenerator keyGenAes = KeyGenerator.getInstance("AES", "BC");
+    KeyGenerator keyGenAes = KeyGenerator.getInstance("AES", this.cryptoService.getProviderName());
     keyGenAes.init(256, new SecureRandom());
     SecretKey sskAes = keyGenAes.generateKey();
-    KeyPairGenerator kpGenRsa = KeyPairGenerator.getInstance("RSA", "BC");
+    KeyPairGenerator kpGenRsa = KeyPairGenerator.getInstance("RSA", this.cryptoService.getProviderName());
     // 2048 is enough for encrypting SSK.
     kpGenRsa.initialize(2048, new SecureRandom());
     KeyPair keyPairAlice = kpGenRsa.generateKeyPair();
     long longStart = System.currentTimeMillis();
     // Bob makes and sent data:
       //SSK:
-    Cipher cipherRsa = Cipher.getInstance("RSA", "BC");
+    Cipher cipherRsa = Cipher.getInstance("RSA", this.cryptoService.getProviderName());
     cipherRsa.init(Cipher.ENCRYPT_MODE, keyPairAlice.getPublic());
     cipherRsa.update(sskAes.getEncoded());
     byte[] encryptedSsk = cipherRsa.doFinal();
-    System.out.println("testRsaAesBc SSK size: " + sskAes.getEncoded().length);
-    System.out.println("testRsaAesBc Encrypted SSK size: " + encryptedSsk.length);
+    this.log.info(null, CryptoTest.class,"testRsaAesBc SSK size: " + sskAes.getEncoded().length);
+    this.log.info(null, CryptoTest.class,"testRsaAesBc Encrypted SSK size: " + encryptedSsk.length);
     Signature sigMk = Signature.getInstance("SHA256withRSA");
     KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(this.ksPassword);
     KeyStore.PrivateKeyEntry pkEntry = (KeyStore.PrivateKeyEntry) pkcs12Store.getEntry("AJettyFileExch1", protParam);
@@ -274,17 +274,17 @@ public class CryptoTest {
     sigMk.initSign(bobSk, new SecureRandom());
     sigMk.update(encryptedSsk);
     byte[] sigSsk = sigMk.sign();
-    System.out.println("testRsaAesBc Signature SSK size: " + sigSsk.length);
+    this.log.info(null, CryptoTest.class,"testRsaAesBc Signature SSK size: " + sigSsk.length);
       //DATA:
-    Cipher cipherAes = Cipher.getInstance("AES/ECB/PKCS7Padding", "BC");
+    Cipher cipherAes = Cipher.getInstance("AES/ECB/PKCS7Padding", this.cryptoService.getProviderName());
     cipherAes.init(Cipher.ENCRYPT_MODE, sskAes);
     byte[] data = dataString.getBytes(this.charset);
     byte[] encryptedData = cipherAes.doFinal(data);
-    System.out.println("testRsaAesBc Encrypted data size: " + encryptedData.length);
+    this.log.info(null, CryptoTest.class,"testRsaAesBc Encrypted data size: " + encryptedData.length);
     sigMk.initSign(bobSk, new SecureRandom());
     sigMk.update(encryptedData);
     byte[] sigDt = sigMk.sign();
-    System.out.println("testRsaAesBc Signature data size: " + sigDt.length);
+    this.log.info(null, CryptoTest.class,"testRsaAesBc Signature data size: " + sigDt.length);
     // Alice has received data:
     PublicKey bobPk = pkcs12Store.getCertificate("AJettyFileExch1").getPublicKey();
     sigMk.initVerify(bobPk);
@@ -296,19 +296,19 @@ public class CryptoTest {
         cipherRsa.init(Cipher.DECRYPT_MODE, keyPairAlice.getPrivate());
         cipherRsa.update(encryptedSsk);
         byte[] decryptedSsk = cipherRsa.doFinal();
-        System.out.println("testRsaAesBc Restore decrypted SSK with algorithm: " + sskAes.getAlgorithm());
+        this.log.info(null, CryptoTest.class,"testRsaAesBc Restore decrypted SSK with algorithm: " + sskAes.getAlgorithm());
         SecretKeySpec sskAesRec = new SecretKeySpec(decryptedSsk, sskAes.getAlgorithm());
         cipherAes.init(Cipher.DECRYPT_MODE, sskAesRec);
         byte[] decryptedData = cipherAes.doFinal(encryptedData);
         String received = new String(decryptedData, this.charset);
         assertEquals(this.dataString, received);
         Long takeMlSec = System.currentTimeMillis() - longStart;
-        System.out.println("testRsaAesBc RSA/AES takes to encrypt/decrypt/sign/verify milliseconds: " + takeMlSec);
+        this.log.info(null, CryptoTest.class,"testRsaAesBc RSA/AES takes to encrypt/decrypt/sign/verify milliseconds: " + takeMlSec);
       } else {
-        System.out.println("testRsaAesBc Wrong signature DATA!!!");
+        this.log.info(null, CryptoTest.class,"testRsaAesBc Wrong signature DATA!!!");
       }
     } else {
-      System.out.println("testRsaAesBc Wrong signature SSK!!!");
+      this.log.info(null, CryptoTest.class,"testRsaAesBc Wrong signature SSK!!!");
     }
   }
 
@@ -317,26 +317,32 @@ public class CryptoTest {
    **/
   @Test
   public void testRsaAesBcRealData() throws Exception {
+    initIfNeed();
     // get Bob's keystore:
-    File pks12File = new File("ajettykeystore.1");
-    KeyStore pkcs12Store = KeyStore.getInstance("PKCS12", "BC");
+    File pks12File;
+    if (this.ksPath == null) {
+      pks12File = new File("ajettykeystore.1");
+    } else {
+      pks12File = new File(this.ksPath + File.separator + "ajettykeystore.1");
+    }
+    KeyStore pkcs12Store = KeyStore.getInstance("PKCS12", this.cryptoService.getProviderName());
     pkcs12Store.load(new FileInputStream(pks12File), this.ksPassword);
-    KeyGenerator keyGenAes = KeyGenerator.getInstance("AES", "BC");
+    KeyGenerator keyGenAes = KeyGenerator.getInstance("AES", this.cryptoService.getProviderName());
     keyGenAes.init(256, new SecureRandom());
     SecretKey sskAes = keyGenAes.generateKey();
-    KeyPairGenerator kpGenRsa = KeyPairGenerator.getInstance("RSA", "BC");
+    KeyPairGenerator kpGenRsa = KeyPairGenerator.getInstance("RSA", this.cryptoService.getProviderName());
     // 2048 is enough for encrypting SSK.
     kpGenRsa.initialize(2048, new SecureRandom());
     KeyPair keyPairAlice = kpGenRsa.generateKeyPair();
     long longStart = System.currentTimeMillis();
     // Bob makes and sent data:
       //SSK:
-    Cipher cipherRsa = Cipher.getInstance("RSA", "BC");
+    Cipher cipherRsa = Cipher.getInstance("RSA", this.cryptoService.getProviderName());
     cipherRsa.init(Cipher.ENCRYPT_MODE, keyPairAlice.getPublic());
     cipherRsa.update(sskAes.getEncoded());
     byte[] encryptedSsk = cipherRsa.doFinal();
-    System.out.println("testRsaAesBcRealData SSK size: " + sskAes.getEncoded().length);
-    System.out.println("testRsaAesBcRealData Encrypted SSK size: " + encryptedSsk.length);
+    this.log.info(null, CryptoTest.class,"testRsaAesBcRealData SSK size: " + sskAes.getEncoded().length);
+    this.log.info(null, CryptoTest.class,"testRsaAesBcRealData Encrypted SSK size: " + encryptedSsk.length);
     Signature sigMk = Signature.getInstance("SHA256withRSA");
     KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(this.ksPassword);
     KeyStore.PrivateKeyEntry pkEntry = (KeyStore.PrivateKeyEntry) pkcs12Store.getEntry("AJettyFileExch1", protParam);
@@ -344,43 +350,51 @@ public class CryptoTest {
     sigMk.initSign(bobSk, new SecureRandom());
     sigMk.update(encryptedSsk);
     byte[] sigSsk = sigMk.sign();
-    System.out.println("testRsaAesBcRealData Signature SSK size: " + sigSsk.length);
+    this.log.info(null, CryptoTest.class,"testRsaAesBcRealData Signature SSK size: " + sigSsk.length);
       //DATA:
-    Cipher cipherAes = Cipher.getInstance("AES/ECB/PKCS7Padding", "BC");
+    Cipher cipherAes = Cipher.getInstance("AES/ECB/PKCS7Padding", this.cryptoService.getProviderName());
     cipherAes.init(Cipher.ENCRYPT_MODE, sskAes);
-    File sqliteFl = new File("src" + File.separator + "test" + File.separator + "bobs-pizza-nfs.sqlite");
+    File sqliteFl;
+    if (this.ksPath == null) {
+      sqliteFl = new File("src" + File.separator + "test" + File.separator + "bobs-pizza-nfs.sqlite");
+    } else {
+      sqliteFl = new File(this.ksPath + File.separator + "bobs-pizza-nfs.sqlite");
+    }
     FileInputStream fisData = new FileInputStream(sqliteFl);
     BufferedInputStream bis = new BufferedInputStream(fisData);
-    FileOutputStream fosEncryptedData = new FileOutputStream("bobs-pizza-nfs.encr");
+    File encrFl;
+    if (this.ksPath == null) {
+      encrFl = new File("bobs-pizza-nfs.encr");
+    } else {
+      encrFl = new File(this.ksPath + File.separator + "bobs-pizza-nfs.encr");
+    }
+    FileOutputStream fosEncryptedData = new FileOutputStream(encrFl);
     CipherOutputStream cous = new CipherOutputStream(fosEncryptedData, cipherAes);
-    Digest sha1 = new SHA1Digest();
     byte[] buffer = new byte[1024];
     int len;
     while ((len = bis.read(buffer)) >= 0) {
       cous.write(buffer, 0, len);
-      sha1.update(buffer, 0, buffer.length);
     };
     bis.close();
     cous.flush();
     cous.close();
-    byte[] digestOri = new byte[sha1.getDigestSize()];
-    sha1.doFinal(digestOri, 0);
+    byte[] digestOri = this.cryptoService.calculateSha1(sqliteFl);
     sigMk.initSign(bobSk, new SecureRandom());
-    FileInputStream fisDataEncr = new FileInputStream("bobs-pizza-nfs.encr");
+    FileInputStream fisDataEncr = new FileInputStream(encrFl);
     bis = new BufferedInputStream(fisDataEncr);
     while ((len = bis.read(buffer)) >= 0) {
       sigMk.update(buffer, 0, len);
     };
     bis.close();
     byte[] sigDt = sigMk.sign();
-    System.out.println("testRsaAesBcRealData Signature data size: " + sigDt.length);
+    this.log.info(null, CryptoTest.class,"testRsaAesBcRealData Signature data size: " + sigDt.length);
     // Alice has received data:
     PublicKey bobPk = pkcs12Store.getCertificate("AJettyFileExch1").getPublicKey();
     sigMk.initVerify(bobPk);
     sigMk.update(encryptedSsk);
     if (sigMk.verify(sigSsk)) {
       sigMk.initVerify(bobPk);
-      fisDataEncr = new FileInputStream("bobs-pizza-nfs.encr");
+      fisDataEncr = new FileInputStream(encrFl);
       bis = new BufferedInputStream(fisDataEncr);
       while ((len = bis.read(buffer)) >= 0) {
         sigMk.update(buffer, 0, len);
@@ -389,12 +403,18 @@ public class CryptoTest {
       if (sigMk.verify(sigDt)) {
         cipherRsa.init(Cipher.DECRYPT_MODE, keyPairAlice.getPrivate());
         byte[] decryptedSsk = cipherRsa.doFinal(encryptedSsk);
-        System.out.println("testRsaAesBcRealData Restore decrypted SSK size/algorithm: "  + decryptedSsk + "/" + sskAes.getAlgorithm());
+        this.log.info(null, CryptoTest.class,"testRsaAesBcRealData Restore decrypted SSK size/algorithm: "  + decryptedSsk + "/" + sskAes.getAlgorithm());
         SecretKeySpec sskAesRec = new SecretKeySpec(decryptedSsk, sskAes.getAlgorithm());
         cipherAes.init(Cipher.DECRYPT_MODE, sskAesRec);
-        fisDataEncr = new FileInputStream("bobs-pizza-nfs.encr");
+        fisDataEncr = new FileInputStream(encrFl);
         bis = new BufferedInputStream(fisDataEncr);
-        FileOutputStream fosDecryptedData = new FileOutputStream("bobs-pizza-nfs-r.sqlite");
+        File recFl;
+        if (this.ksPath == null) {
+          recFl = new File("bobs-pizza-nfs-r.sqlite");
+        } else {
+          recFl = new File(this.ksPath + File.separator + "bobs-pizza-nfs-r.sqlite");
+        }
+        FileOutputStream fosDecryptedData = new FileOutputStream(recFl);
         cous = new CipherOutputStream(fosDecryptedData, cipherAes);
         while ((len = bis.read(buffer)) >= 0) {
           cous.write(buffer, 0, len);
@@ -402,22 +422,15 @@ public class CryptoTest {
         bis.close();
         cous.flush();
         cous.close();
-        bis = new BufferedInputStream(new FileInputStream("bobs-pizza-nfs-r.sqlite"));
-        sha1 = new SHA1Digest();
-        while ((len = bis.read(buffer)) >= 0) {
-          sha1.update(buffer, 0, buffer.length);
-        };
-        bis.close();
-        byte[] digestRec = new byte[sha1.getDigestSize()];
-        sha1.doFinal(digestRec, 0);
+        byte[] digestRec = this.cryptoService.calculateSha1(recFl);
         assertArrayEquals(digestOri, digestRec);
         Long takeMlSec = System.currentTimeMillis() - longStart;
-        System.out.println("testRsaAesBcRealData RSA/AES takes to encrypt/decrypt/sign/verify milliseconds: " + takeMlSec);
+        this.log.info(null, CryptoTest.class,"testRsaAesBcRealData RSA/AES takes to encrypt/decrypt/sign/verify milliseconds: " + takeMlSec);
       } else {
-        System.out.println("testRsaAesBcRealData Wrong signature DATA!!!");
+        this.log.info(null, CryptoTest.class,"testRsaAesBcRealData Wrong signature DATA!!!");
       }
     } else {
-      System.out.println("testRsaAesBcRealData Wrong signature SSK!!!");
+      this.log.info(null, CryptoTest.class,"testRsaAesBcRealData Wrong signature SSK!!!");
     }
   }
 
@@ -425,7 +438,8 @@ public class CryptoTest {
    * <p>Test password strong.<p>
    **/
   @Test
-  public void testPasswordStrong() {
+  public void testPasswordStrong() throws Exception {
+    initIfNeed();
     char[] password = null;
     String rez = this.cryptoService.isPasswordStrong(password);
     assertNotNull(rez);
@@ -444,5 +458,53 @@ public class CryptoTest {
     password = "SimilGrovTheBest12345".toCharArray();
     rez = this.cryptoService.isPasswordStrong(password);
     assertNull(rez);
+  }
+
+  /**
+   * <p>Getter for log.</p>
+   * @return ILogger
+   **/
+  public final ILogger getLog() {
+    return this.log;
+  }
+
+  /**
+   * <p>Setter for log.</p>
+   * @param pLog reference
+   **/
+  public final void setLog(final ILogger pLog) {
+    this.log = pLog;
+  }
+
+  /**
+   * <p>Getter for ksPath.</p>
+   * @return String
+   **/
+  public final String getKsPath() {
+    return this.ksPath;
+  }
+
+  /**
+   * <p>Setter for ksPath.</p>
+   * @param pKsPath reference
+   **/
+  public final void setKsPath(final String pKsPath) {
+    this.ksPath = pKsPath;
+  }
+
+  /**
+   * <p>Getter for cryptoService.</p>
+   * @return CryptoService
+   **/
+  public final ICryptoService getCryptoService() {
+    return this.cryptoService;
+  }
+
+  /**
+   * <p>Setter for cryptoService.</p>
+   * @param pCryptoService reference
+   **/
+  public final void setCryptoService(final ICryptoService pCryptoService) {
+    this.cryptoService = pCryptoService;
   }
 }

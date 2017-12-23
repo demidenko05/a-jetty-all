@@ -15,6 +15,8 @@ package org.beigesoft.ajetty.crypto;
 import java.math.BigInteger;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileInputStream;
+import java.io.BufferedInputStream;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
@@ -26,6 +28,7 @@ import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.security.Security;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.x500.X500Name;
@@ -57,6 +60,9 @@ import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.DERBMPString;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.operator.OutputEncryptor;
+import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
  * <p>It serves A-Jetty with encryption features.
@@ -167,21 +173,12 @@ public class CryptoService implements ICryptoService {
     Date start = cal.getTime();
     cal.add(Calendar.YEAR, 10);
     Date end = cal.getTime();
-      // root:
-    /*kpGenRsa.initialize(2048, new SecureRandom());
-    KeyPair kpRoot = kpGenRsa.generateKeyPair();
-    String x500dn = "CN=A-Jetty" + pAjettyIn
-      + " ROOT, OU=A-Jetty" + pAjettyIn + " ROOT, O=A-Jetty"
-        + pAjettyIn + " ROOT, C=RU";
-    X509Certificate rootCert = buildRootCert(kpRoot, x500dn, start, end);*/
       // CA:
     kpGenRsa.initialize(2048, new SecureRandom());
     KeyPair kpCa = kpGenRsa.generateKeyPair();
     String x500dn = "CN=A-Jetty" + pAjettyIn
       + " CA, OU=A-Jetty" + pAjettyIn + " CA, O=A-Jetty"
         + pAjettyIn + " CA, C=RU";
-    //X509Certificate caCert = buildCaCert(kpCa.getPublic(),
-      //kpRoot.getPrivate(), rootCert, x500dn, start, end);
     X509Certificate caCert = buildCaCertSelfSign(kpCa, x500dn, start, end);
       // HTTPS:
     x500dn = "CN=localhost, OU=A-Jetty" + pAjettyIn + " HTTPS, O=A-Jetty"
@@ -195,11 +192,10 @@ public class CryptoService implements ICryptoService {
     X509Certificate fileExchCert = buildEndEntityCert(kpFileExch.getPublic(),
       kpCa.getPrivate(), caCert, 3, x500dn, start, end);
     // save to keystore:
-    OutputEncryptor encOut = new JcePKCSPBEOutputEncryptorBuilder(
-      NISTObjectIdentifiers.id_aes256_CBC).setProvider("BC").build(pPassw);
-    /*PKCS12SafeBagBuilder rtCrtBagBld = new JcaPKCS12SafeBagBuilder(rootCert);
-    rtCrtBagBld.addBagAttribute(PKCS12SafeBag.friendlyNameAttribute,
-      new DERBMPString("AJettyRoot" + pAjettyIn));*/
+    JcePKCSPBEOutputEncryptorBuilder jcePcEb =
+      new JcePKCSPBEOutputEncryptorBuilder(NISTObjectIdentifiers.id_aes256_CBC);
+    jcePcEb.setProvider("BC");
+    OutputEncryptor encOut = jcePcEb.build(pPassw);
     PKCS12SafeBagBuilder caCrtBagBld = new JcaPKCS12SafeBagBuilder(caCert);
     caCrtBagBld.addBagAttribute(PKCS12SafeBag.friendlyNameAttribute,
       new DERBMPString("AJettyCa" + pAjettyIn));
@@ -248,6 +244,55 @@ public class CryptoService implements ICryptoService {
         pfxOut.close();
       }
     }
+  }
+
+  /**
+   * <p>Calculate SHA1 for given file.</p>
+   * @param pFile file
+   * @return SHA1 bytes array
+   * @throws Exception an Exception
+   */
+  @Override
+  public final byte[] calculateSha1(final File pFile) throws Exception {
+    BufferedInputStream bis = null;
+    Digest sha1 = new SHA1Digest();
+    try {
+      bis = new BufferedInputStream(new FileInputStream(pFile));
+      byte[] buffer = new byte[1024];
+      int len;
+      while ((len = bis.read(buffer)) >= 0) {
+        sha1.update(buffer, 0, buffer.length);
+      }
+    } finally {
+      if (bis != null) {
+        try {
+          bis.close();
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    }
+    byte[] digest = new byte[sha1.getDigestSize()];
+    sha1.doFinal(digest, 0);
+    return digest;
+  }
+
+  /**
+   * <p>Initialize (cryptop-rovider).</p>
+   * @throws Exception an Exception
+   */
+  @Override
+  public final void init() throws Exception {
+    Security.addProvider(new BouncyCastleProvider());
+  }
+
+  /**
+   * <p>Get crypto-provider name.</p>
+   * @return crypto-provider name
+   **/
+  @Override
+  public final String getProviderName() {
+    return "BC";
   }
 
   /**

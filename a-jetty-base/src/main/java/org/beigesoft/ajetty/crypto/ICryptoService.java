@@ -12,10 +12,13 @@ package org.beigesoft.ajetty.crypto;
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
  */
 
+import java.io.File;
+
 /**
  * <p>It serves A-Jetty with encryption features.</p>
  */
 public interface ICryptoService {
+
   /**
    * <p>Check if password strong.</p>
    * @param pPassword Password
@@ -45,4 +48,25 @@ public interface ICryptoService {
    */
   void createKeyStoreWithCredentials(String pFilePath, int pAjettyIn,
     char[] pPassw) throws Exception;
+
+  /**
+   * <p>Calculate SHA1 for given file.</p>
+   * return SHA1 bytes array
+   * @param pFile file
+   * @return SHA1 sum
+   * @throws Exception an Exception
+   */
+  byte[] calculateSha1(File pFile) throws Exception;
+
+  /**
+   * <p>Initialize (cryptop-rovider).</p>
+   * @throws Exception an Exception
+   */
+  void init() throws Exception;
+
+  /**
+   * <p>Get crypto-provider name.</p>
+   * @return crypto-provider name
+   **/
+  String getProviderName();
 }

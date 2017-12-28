@@ -1379,7 +1379,8 @@ public class SslContextFactory extends AbstractLifeCycle
     public void customize(SSLEngine sslEngine)
     {
         SSLParameters sslParams = sslEngine.getSSLParameters();
-        sslParams.setEndpointIdentificationAlgorithm(_endpointIdentificationAlgorithm);
+        //AndroidRuntime(28289): java.lang.NoSuchMethodError: javax.net.ssl.SSLParameters.setEndpointIdentificationAlgorithm
+        //sslParams.setEndpointIdentificationAlgorithm(_endpointIdentificationAlgorithm);
         sslEngine.setSSLParameters(sslParams);
 
         if (getWantClientAuth())

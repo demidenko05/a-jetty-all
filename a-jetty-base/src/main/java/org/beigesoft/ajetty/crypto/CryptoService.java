@@ -25,6 +25,7 @@ import java.security.cert.X509Certificate;
 import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Calendar;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -94,9 +95,11 @@ public class CryptoService implements ICryptoService {
   /**
    * <p>Check if password strong.
    * It implements logic:
-   * Password must be at least 15 letters and digits!
-   * 80% of them must be different!
-   * 3-5 of them must be digits!</p>
+   * At least 15 letters and digits!
+   * 60% of them must be different!
+   * At least 50% of them must be letters!
+   * At least 3 of them must be digits!
+   * No containing qwerty, 12345, admin, user etc!</p>
    * @param pPassword Password
    * @return NULL if strong, otherwise message.
    **/
@@ -106,23 +109,46 @@ public class CryptoService implements ICryptoService {
     if (pPassword == null || pPassword.length < 15) {
       return wrong;
     }
+    String passw = new String(pPassword).toLowerCase();
+    if (passw.contains("qwert") || passw.contains("2345")
+      || passw.contains("admin") || passw.contains("user")
+        || passw.contains("qwaszx") || passw.contains("qweasd")
+          || passw.contains("qazwsx") || passw.contains("wsxedc")
+        || passw.contains("wqsaxz") || passw.contains("ewqdsa")
+      || passw.contains("zaqxsw") || passw.contains("xswzaq")
+        || passw.contains("qscwdv") || passw.contains("csqvdw")
+          || passw.contains("5432") || passw.contains("5678")
+            || passw.contains("9876") || passw.contains("zaxqsc")
+          || passw.contains("qscax") || passw.contains("csqxa")
+        || passw.contains("trewq") || passw.contains("asdfg")
+      || passw.contains("zxcvb") || passw.contains("bvcxz")
+        || passw.contains("gfdsa") || passw.contains("password")) {
+      return wrong;
+    }
     HashSet<Character> chars = new HashSet<Character>();
-    HashSet<Character> digits = new HashSet<Character>();
+    ArrayList<Character> digits = new ArrayList<Character>();
+    ArrayList<Character> letters = new ArrayList<Character>();
     for (char ch : pPassword) {
       if (!Character.isLetterOrDigit(ch)) {
         return wrong;
       }
       if (Character.isDigit(ch)) {
         digits.add(ch);
+      } else {
+        letters.add(ch);
       }
       chars.add(ch);
     }
     double allLn = pPassword.length;
+    double lettersLn = letters.size();
     double distinctLn = chars.size();
-    if (distinctLn / allLn < 0.79999999999) {
+    if (lettersLn / allLn < 0.49999999999) {
       return wrong;
     }
-    if (digits.size() < 3 || digits.size() > 5) {
+    if (distinctLn / allLn < 0.59999999999) {
+      return wrong;
+    }
+    if (digits.size() < 3) {
       return wrong;
     }
     return null;

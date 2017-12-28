@@ -451,11 +451,12 @@ public class CryptoTest {
     assertNotNull(rez);
     password = "gracailikiki213".toCharArray();
     rez = this.cryptoService.isPasswordStrong(password);
-    assertNotNull(rez);
+    assertNull(rez);
     password = "gracioliFIkw213".toCharArray();
     rez = this.cryptoService.isPasswordStrong(password);
     assertNull(rez);
-    password = "SimilGrovTheBest12345".toCharArray();
+    //human friendly strong (to try by hand) passwords:
+    password = "deviLWoodgrovE155".toCharArray();
     rez = this.cryptoService.isPasswordStrong(password);
     assertNull(rez);
   }

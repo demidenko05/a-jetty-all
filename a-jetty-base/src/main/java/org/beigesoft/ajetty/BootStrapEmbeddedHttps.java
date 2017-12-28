@@ -96,6 +96,11 @@ public class BootStrapEmbeddedHttps {
   private String httpsPassword;
 
   /**
+   * <p>Crypto provider name.</p>
+   **/
+  private String cryptoProviderName = "BC";
+
+  /**
    * <p>Database realm service.</p>
    **/
   private DataBaseLoginService dataBaseLoginService;
@@ -118,7 +123,7 @@ public class BootStrapEmbeddedHttps {
       SslContextFactory sslContextFactory = new SslContextFactory();
       sslContextFactory.setKeyStorePath(this.pkcs12File.getAbsolutePath());
       sslContextFactory.setKeyStorePassword(this.password);
-      sslContextFactory.setKeyStoreProvider("BC");
+      sslContextFactory.setKeyStoreProvider(this.cryptoProviderName);
       sslContextFactory.setKeyStoreType("PKCS12");
       if (this.httpsPassword != null) {
         sslContextFactory.setKeyManagerPassword(this.httpsPassword);
@@ -154,7 +159,9 @@ public class BootStrapEmbeddedHttps {
    * @throws Exception an Exception
    **/
   public final void startServer() throws Exception {
-    createServer();
+    if (this.server == null) {
+      createServer();
+    }
     this.server.start();
     this.isStarted = true;
   }
@@ -323,5 +330,21 @@ public class BootStrapEmbeddedHttps {
    **/
   public final void setHttpsPassword(final String pHttpsPassword) {
     this.httpsPassword = pHttpsPassword;
+  }
+
+  /**
+   * <p>Getter for cryptoProviderName.</p>
+   * @return String
+   **/
+  public final String getCryptoProviderName() {
+    return this.cryptoProviderName;
+  }
+
+  /**
+   * <p>Setter for cryptoProviderName.</p>
+   * @param pCryptoProviderName reference
+   **/
+  public final void setCryptoProviderName(final String pCryptoProviderName) {
+    this.cryptoProviderName = pCryptoProviderName;
   }
 }

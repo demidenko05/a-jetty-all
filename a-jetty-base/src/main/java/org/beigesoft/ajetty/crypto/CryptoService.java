@@ -405,11 +405,11 @@ public class CryptoService implements ICryptoService {
     JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
     certBldr.addExtension(Extension
       .subjectKeyIdentifier, false, extUtils
-      .createSubjectKeyIdentifier(pKpCa.getPublic()))
-      .addExtension(Extension.basicConstraints, true,
-        new BasicConstraints(Integer.MAX_VALUE))
-      .addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage
-      .digitalSignature | KeyUsage.keyCertSign | KeyUsage.cRLSign));
+        .createSubjectKeyIdentifier(pKpCa.getPublic()));
+    certBldr.addExtension(Extension.basicConstraints, true,
+        new BasicConstraints(Integer.MAX_VALUE));
+    certBldr.addExtension(Extension.keyUsage, true,
+      new KeyUsage(KeyUsage.keyCertSign));
     ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA")
       .setProvider("BC").build(pKpCa.getPrivate());
     return new JcaX509CertificateConverter().setProvider("BC")

@@ -27,8 +27,10 @@ import java.security.Key;
 import java.security.KeyPairGenerator;
 import java.security.cert.X509Certificate;
 import java.security.KeyPair;
+import java.security.KeyFactory;
 import java.security.Signature;
 import java.security.SecureRandom;
+import java.security.spec.X509EncodedKeySpec;
 import java.security.cert.Certificate;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -286,7 +288,10 @@ public class CryptoTest {
     byte[] sigDt = sigMk.sign();
     this.log.info(null, CryptoTest.class,"testRsaAesBc Signature data size: " + sigDt.length);
     // Alice has received data:
-    PublicKey bobPk = pkcs12Store.getCertificate("AJettyFileExch1").getPublicKey();
+    byte[] bobPkFromFile = pkcs12Store.getCertificate("AJettyFileExch1").getPublicKey().getEncoded();
+    X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(bobPkFromFile);
+    KeyFactory keyFactory = KeyFactory.getInstance("RSA", this.cryptoService.getProviderName());
+    PublicKey bobPk = keyFactory.generatePublic(pubKeySpec);
     sigMk.initVerify(bobPk);
     sigMk.update(encryptedSsk);
     if (sigMk.verify(sigSsk)) {
@@ -364,17 +369,17 @@ public class CryptoTest {
     BufferedInputStream bis = new BufferedInputStream(fisData);
     File encrFl;
     if (this.ksPath == null) {
-      encrFl = new File("bobs-pizza-nfs.encr");
+      encrFl = new File("bobs-pizza-nfs.sqlten");
     } else {
-      encrFl = new File(this.ksPath + File.separator + "bobs-pizza-nfs.encr");
+      encrFl = new File(this.ksPath + File.separator + "bobs-pizza-nfs.sqlten");
     }
     FileOutputStream fosEncryptedData = new FileOutputStream(encrFl);
     CipherOutputStream cous = new CipherOutputStream(fosEncryptedData, cipherAes);
     byte[] buffer = new byte[1024];
     int len;
-    while ((len = bis.read(buffer)) >= 0) {
+    while ((len = bis.read(buffer)) > 0) {
       cous.write(buffer, 0, len);
-    };
+    }
     bis.close();
     cous.flush();
     cous.close();
@@ -384,21 +389,24 @@ public class CryptoTest {
     bis = new BufferedInputStream(fisDataEncr);
     while ((len = bis.read(buffer)) >= 0) {
       sigMk.update(buffer, 0, len);
-    };
+    }
     bis.close();
     byte[] sigDt = sigMk.sign();
     this.log.info(null, CryptoTest.class,"testRsaAesBcRealData Signature data size: " + sigDt.length);
     // Alice has received data:
-    PublicKey bobPk = pkcs12Store.getCertificate("AJettyFileExch1").getPublicKey();
+    byte[] bobPkFromFile = pkcs12Store.getCertificate("AJettyFileExch1").getPublicKey().getEncoded();
+    X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(bobPkFromFile);
+    KeyFactory keyFactory = KeyFactory.getInstance("RSA", this.cryptoService.getProviderName());
+    PublicKey bobPk = keyFactory.generatePublic(pubKeySpec);
     sigMk.initVerify(bobPk);
     sigMk.update(encryptedSsk);
     if (sigMk.verify(sigSsk)) {
       sigMk.initVerify(bobPk);
       fisDataEncr = new FileInputStream(encrFl);
       bis = new BufferedInputStream(fisDataEncr);
-      while ((len = bis.read(buffer)) >= 0) {
+      while ((len = bis.read(buffer)) > 0) {
         sigMk.update(buffer, 0, len);
-      };
+      }
       bis.close();
       if (sigMk.verify(sigDt)) {
         cipherRsa.init(Cipher.DECRYPT_MODE, keyPairAlice.getPrivate());
@@ -416,9 +424,9 @@ public class CryptoTest {
         }
         FileOutputStream fosDecryptedData = new FileOutputStream(recFl);
         cous = new CipherOutputStream(fosDecryptedData, cipherAes);
-        while ((len = bis.read(buffer)) >= 0) {
+        while ((len = bis.read(buffer)) > 0) {
           cous.write(buffer, 0, len);
-        };
+        }
         bis.close();
         cous.flush();
         cous.close();

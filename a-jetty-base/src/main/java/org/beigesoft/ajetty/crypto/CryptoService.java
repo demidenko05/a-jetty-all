@@ -309,7 +309,9 @@ public class CryptoService implements ICryptoService {
    */
   @Override
   public final void init() throws Exception {
-    Security.addProvider(new BouncyCastleProvider());
+    if (Security.getProvider(getProviderName()) == null) {
+      Security.addProvider(new BouncyCastleProvider());
+    }
   }
 
   /**
@@ -378,7 +380,7 @@ public class CryptoService implements ICryptoService {
       .createAuthorityKeyIdentifier(pRootCert)).addExtension(Extension
       .subjectKeyIdentifier, false, extUtils.createSubjectKeyIdentifier(pCaPk))
       .addExtension(Extension.basicConstraints, true,
-        new BasicConstraints(Integer.MAX_VALUE))
+        new BasicConstraints(0))
       .addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage
       .digitalSignature | KeyUsage.keyCertSign | KeyUsage.cRLSign));
     ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA")
@@ -407,9 +409,9 @@ public class CryptoService implements ICryptoService {
       .subjectKeyIdentifier, false, extUtils
         .createSubjectKeyIdentifier(pKpCa.getPublic()));
     certBldr.addExtension(Extension.basicConstraints, true,
-        new BasicConstraints(Integer.MAX_VALUE));
+        new BasicConstraints(0));
     certBldr.addExtension(Extension.keyUsage, true,
-      new KeyUsage(KeyUsage.keyCertSign));
+      new KeyUsage(KeyUsage.keyCertSign | KeyUsage.cRLSign));
     ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA")
       .setProvider("BC").build(pKpCa.getPrivate());
     return new JcaX509CertificateConverter().setProvider("BC")

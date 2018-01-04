@@ -230,17 +230,24 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
     setLocationRelativeTo(null);
     // A-Jetty:
     this.factoryAppBeans = new FactoryAppBeansEmbedded();
-    String currDir = BootStrapEmbeddedHttpsSwing.class.getProtectionDomain()
-      .getCodeSource().getLocation().toURI().getPath();
-    String webAppPath = currDir.substring(0, currDir
-      .lastIndexOf(File.separator) + 1) + "webapp";
+    String appDir = null;
+    try {
+      File jarBoot = new File(BootStrapEmbeddedHttpsSwing.class
+        .getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+      appDir = jarBoot.getParentFile().getPath();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    if (appDir == null) {
+      appDir = System.getProperty("user.dir");
+    }
+    String webAppPath = appDir + File.separator + "webapp";
     File webappdir = new File(webAppPath);
     if (!webappdir.exists() || !webappdir.isDirectory()) {
       throw new Exception("Web app directory not found: " + webAppPath);
     }
     // keystore placed into [webappdir-parent]/ks folder:
-    File ksDir = new File(webappdir.getParentFile().getAbsolutePath()
-      + File.separator + "ks");
+    File ksDir = new File(appDir + File.separator + "ks");
     if (!ksDir.exists() && !ksDir.mkdir()) {
       throw new Exception("Can't create ks directory: " + ksDir);
     }

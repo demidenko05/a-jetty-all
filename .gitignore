@@ -14,4 +14,4 @@ release.properties
 *.log
 a-jetty-base/ajettykeystore.1
 a-jetty-base/bobs-pizza-nfs-r.sqlite
-a-jetty-base/bobs-pizza-nfs.encr
+a-jetty-base/bobs-pizza-nfs.sqlten

@@ -105,32 +105,33 @@ public class CryptoService implements ICryptoService {
    **/
   @Override
   public final String isPasswordStrong(final char[] pPassword) {
-    String wrong = getMsg("WrongPassword");
     if (pPassword == null || pPassword.length < 15) {
-      return wrong;
+      return getMsg("Password15");
     }
     String passw = new String(pPassword).toLowerCase();
-    if (passw.contains("qwert") || passw.contains("2345")
-      || passw.contains("admin") || passw.contains("user")
-        || passw.contains("qwaszx") || passw.contains("qweasd")
-          || passw.contains("qazwsx") || passw.contains("wsxedc")
-        || passw.contains("wqsaxz") || passw.contains("ewqdsa")
-      || passw.contains("zaqxsw") || passw.contains("xswzaq")
-        || passw.contains("qscwdv") || passw.contains("csqvdw")
-          || passw.contains("5432") || passw.contains("5678")
-            || passw.contains("9876") || passw.contains("zaxqsc")
-          || passw.contains("qscax") || passw.contains("csqxa")
-        || passw.contains("trewq") || passw.contains("asdfg")
-      || passw.contains("zxcvb") || passw.contains("bvcxz")
-        || passw.contains("gfdsa") || passw.contains("password")) {
-      return wrong;
+    if (passw.contains("qwert") || passw.contains("qwaszx")
+      || passw.contains("qweasd") || passw.contains("qazwsx")
+        || passw.contains("wsxedc") || passw.contains("wqsaxz")
+          || passw.contains("ewqdsa") || passw.contains("zaqxsw")
+            || passw.contains("xswzaq") || passw.contains("qscwdv")
+              || passw.contains("csqvdw") || passw.contains("zaxqsc")
+                || passw.contains("qscax") || passw.contains("csqxa")
+                  || passw.contains("trewq") || passw.contains("asdfg")
+                || passw.contains("zxcvb") || passw.contains("bvcxz")
+              || passw.contains("gfdsa")) {
+      return getMsg("noQwerty");
+    } else if (passw.contains("2345") || passw.contains("admin")
+      || passw.contains("user") || passw.contains("5432")
+        || passw.contains("5678") || passw.contains("9876")
+          || passw.contains("password")) {
+      return getMsg("noAdmin12345");
     }
     HashSet<Character> chars = new HashSet<Character>();
     ArrayList<Character> digits = new ArrayList<Character>();
     ArrayList<Character> letters = new ArrayList<Character>();
     for (char ch : pPassword) {
       if (!Character.isLetterOrDigit(ch)) {
-        return wrong;
+        return getMsg("letterOrDig");
       }
       if (Character.isDigit(ch)) {
         digits.add(ch);
@@ -143,13 +144,13 @@ public class CryptoService implements ICryptoService {
     double lettersLn = letters.size();
     double distinctLn = chars.size();
     if (lettersLn / allLn < 0.49999999999) {
-      return wrong;
+      return getMsg("lettersAtLeast50pr");
     }
     if (distinctLn / allLn < 0.59999999999) {
-      return wrong;
+      return getMsg("distinct60pr");
     }
     if (digits.size() < 3) {
-      return wrong;
+      return getMsg("atLeast3digits");
     }
     return null;
   }

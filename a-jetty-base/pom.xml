@@ -11,7 +11,7 @@
   
   <name>A-Jetty Base.</name>
   <description>A-Jetty Base can run on Android Java as well as on standard Java 7+ and it can run precompiled JSP/JSTL.</description>
-  <url>http://www.beigesoft.org</url>
+  <url>https://sites.google.com/site/beigesoftware</url>
   <inceptionYear>2016</inceptionYear>
 
   <contributors>
@@ -68,18 +68,13 @@
     <dependency>
       <groupId>org.beigesoft</groupId>
       <artifactId>beige-logging-base</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
       <version>3.1.0</version>
     </dependency>
-    <!--<dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcprov-jdk16</artifactId>
-      <version>1.46</version>
-    </dependency>-->
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk15on</artifactId>
@@ -105,32 +100,6 @@
            </goals>
          </execution>
        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.4</version>
-        <inherited>true</inherited>
-        <configuration>
-          <runOnlyAtExecutionRoot>false</runOnlyAtExecutionRoot>
-          <archive>
-            <manifest>
-              <mainClass>org.beigesoft.ajetty.BootStrap</mainClass>
-            </manifest>
-          </archive>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
-        </configuration>
-        <executions>
-          <execution>
-            <id>make-assembly</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>

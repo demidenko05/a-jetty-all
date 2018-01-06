@@ -50,6 +50,8 @@ import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 
 import org.beigesoft.afactory.IFactoryAppBeans;
 import org.beigesoft.ajetty.crypto.CryptoService;
+import org.beigesoft.log.ILogger;
+import org.beigesoft.log.LoggerFile;
 
 /**
  * <p>
@@ -167,108 +169,124 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
   private CryptoService cryptoService;
 
   /**
+   * <p>Logger.</p>
+   **/
+  private ILogger logger;
+
+  /**
    * <p>Only constructor.</p>
    * @throws Exception any
    **/
   public BootStrapEmbeddedHttpsSwing() throws Exception {
-    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-    // Interface:
-    URL iconURL = getClass().getResource("/favicon.png");
-    ImageIcon icon = new ImageIcon(iconURL);
-    setIconImage(icon.getImage());
-    this.messages = ResourceBundle.getBundle("MessagesAjetty");
-    setTitle(getMsg("title"));
-    GridLayout layout = new GridLayout(12, 1);
-    layout.setVgap(10);
-    setLayout(layout);
-    this.lbAjettyIn = new JLabel(getMsg("AJettyIn"));
-    add(this.lbAjettyIn);
-    this.ftfAjettyIn = new JFormattedTextField(NumberFormat
-      .getIntegerInstance());
-    add(this.ftfAjettyIn);
-    this.lbKeystorePw = new JLabel(getMsg("KeystorePw"));
-    add(this.lbKeystorePw);
-    this.pfKeystorePw = new JPasswordField();
-    add(this.pfKeystorePw);
-    this.lbKeystorePwc = new JLabel(getMsg("KeystorePwc"));
-    add(this.lbKeystorePwc);
-    this.pfKeystorePwc = new JPasswordField();
-    add(this.pfKeystorePwc);
-    this.lbPort = new JLabel(getMsg("port"));
-    add(this.lbPort);
-    this.cmbPort = new JComboBox<Integer>();
-    Integer p8443 = 8443;
-    this.cmbPort.addItem(p8443);
-    this.cmbPort.addItem(new Integer(8444));
-    this.cmbPort.addItem(new Integer(8445));
-    this.cmbPort.addItem(new Integer(8446));
-    this.cmbPort.addItem(new Integer(8447));
-    this.cmbPort.setSelectedItem(p8443);
-    add(this.cmbPort);
-    this.btStart = new JButton(getMsg("start"));
-    this.btStart.addActionListener(this);
-    add(this.btStart);
-    this.btStop = new JButton(getMsg("stop"));
-    this.btStop.addActionListener(this);
-    add(this.btStop);
-    this.btRefresh = new JButton(getMsg("refresh"));
-    this.btRefresh.addActionListener(this);
-    add(this.btRefresh);
-    this.btBrowse = new JButton();
-    this.btBrowse.addActionListener(this);
-    add(this.btBrowse);
-    setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-    addWindowListener(windowListener);
-    Dimension screenDimension = java.awt.Toolkit
-      .getDefaultToolkit().getScreenSize();
-    int width = Math.min(Double.valueOf(screenDimension.getWidth())
-      .intValue(), 400);
-    int height = Math.min(Double.valueOf(screenDimension.getHeight())
-      .intValue(), 500);
-    setPreferredSize(new Dimension(width, height));
-    pack();
-    setLocationRelativeTo(null);
-    // A-Jetty:
-    this.factoryAppBeans = new FactoryAppBeansEmbedded();
     String appDir = null;
     try {
       File jarBoot = new File(BootStrapEmbeddedHttpsSwing.class
         .getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-      appDir = jarBoot.getParentFile().getPath();
+      appDir = jarBoot.getParent();
     } catch (Exception e) {
       e.printStackTrace();
     }
     if (appDir == null) {
       appDir = System.getProperty("user.dir");
     }
-    String webAppPath = appDir + File.separator + "webapp";
-    File webappdir = new File(webAppPath);
-    if (!webappdir.exists() || !webappdir.isDirectory()) {
-      throw new Exception("Web app directory not found: " + webAppPath);
+    if (this.logger == null) {
+      LoggerFile log = new LoggerFile();
+      log.setFilePath(appDir + File.separator + "starter");
+      log.setIsCloseFileAfterRecord(true);
+      this.logger = log;
     }
-    // keystore placed into [webappdir-parent]/ks folder:
-    File ksDir = new File(appDir + File.separator + "ks");
-    if (!ksDir.exists() && !ksDir.mkdir()) {
-      throw new Exception("Can't create ks directory: " + ksDir);
-    }
-    File[] lstFl = ksDir.listFiles();
-    String nmpref = "ajettykeystore.";
-    if (lstFl != null) {
-      if (lstFl.length > 1
-        || lstFl.length == 1 && !lstFl[0].isFile()) {
-        throw new Exception("KS directory must contains only ks file!!!");
-      } else if (lstFl.length == 1 && lstFl[0].isFile()
-        && lstFl[0].getName().startsWith(nmpref)) {
-        String ajettyInStr = lstFl[0].getName().replace(nmpref, "");
-        this.ajettyIn = Integer.parseInt(ajettyInStr);
-        this.isKeystoreCreated = true;
+    try {
+      setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+      // Interface:
+      URL iconURL = getClass().getResource("/favicon.png");
+      ImageIcon icon = new ImageIcon(iconURL);
+      setIconImage(icon.getImage());
+      this.messages = ResourceBundle.getBundle("MessagesAjetty");
+      setTitle(getMsg("title"));
+      GridLayout layout = new GridLayout(12, 1);
+      layout.setVgap(10);
+      setLayout(layout);
+      this.lbAjettyIn = new JLabel(getMsg("AJettyIn"));
+      add(this.lbAjettyIn);
+      this.ftfAjettyIn = new JFormattedTextField(NumberFormat
+        .getIntegerInstance());
+      add(this.ftfAjettyIn);
+      this.lbKeystorePw = new JLabel(getMsg("KeystorePw"));
+      add(this.lbKeystorePw);
+      this.pfKeystorePw = new JPasswordField();
+      add(this.pfKeystorePw);
+      this.lbKeystorePwc = new JLabel(getMsg("KeystorePwc"));
+      add(this.lbKeystorePwc);
+      this.pfKeystorePwc = new JPasswordField();
+      add(this.pfKeystorePwc);
+      this.lbPort = new JLabel(getMsg("port"));
+      add(this.lbPort);
+      this.cmbPort = new JComboBox<Integer>();
+      Integer p8443 = 8443;
+      this.cmbPort.addItem(p8443);
+      this.cmbPort.addItem(new Integer(8444));
+      this.cmbPort.addItem(new Integer(8445));
+      this.cmbPort.addItem(new Integer(8446));
+      this.cmbPort.addItem(new Integer(8447));
+      this.cmbPort.setSelectedItem(p8443);
+      add(this.cmbPort);
+      this.btStart = new JButton(getMsg("start"));
+      this.btStart.addActionListener(this);
+      add(this.btStart);
+      this.btStop = new JButton(getMsg("stop"));
+      this.btStop.addActionListener(this);
+      add(this.btStop);
+      this.btRefresh = new JButton(getMsg("refresh"));
+      this.btRefresh.addActionListener(this);
+      add(this.btRefresh);
+      this.btBrowse = new JButton();
+      this.btBrowse.addActionListener(this);
+      add(this.btBrowse);
+      setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+      addWindowListener(windowListener);
+      Dimension screenDimension = java.awt.Toolkit
+        .getDefaultToolkit().getScreenSize();
+      int width = Math.min(Double.valueOf(screenDimension.getWidth())
+        .intValue(), 400);
+      int height = Math.min(Double.valueOf(screenDimension.getHeight())
+        .intValue(), 500);
+      setPreferredSize(new Dimension(width, height));
+      pack();
+      setLocationRelativeTo(null);
+      // A-Jetty:
+      this.factoryAppBeans = new FactoryAppBeansEmbedded();
+      String webAppPath = appDir + File.separator + "webapp";
+      File webappdir = new File(webAppPath);
+      if (!webappdir.exists() || !webappdir.isDirectory()) {
+        throw new Exception("Web app directory not found: " + webAppPath);
       }
+      // keystore placed into [webappdir-parent]/ks folder:
+      File ksDir = new File(appDir + File.separator + "ks");
+      if (!ksDir.exists() && !ksDir.mkdir()) {
+        throw new Exception("Can't create ks directory: " + ksDir);
+      }
+      File[] lstFl = ksDir.listFiles();
+      String nmpref = "ajettykeystore.";
+      if (lstFl != null) {
+        if (lstFl.length > 1
+          || lstFl.length == 1 && !lstFl[0].isFile()) {
+          throw new Exception("KS directory must contains only ks file!!!");
+        } else if (lstFl.length == 1 && lstFl[0].isFile()
+          && lstFl[0].getName().startsWith(nmpref)) {
+          String ajettyInStr = lstFl[0].getName().replace(nmpref, "");
+          this.ajettyIn = Integer.parseInt(ajettyInStr);
+          this.isKeystoreCreated = true;
+        }
+      }
+      this.bootStrapEmbeddedHttps = new BootStrapEmbeddedHttps();
+      this.bootStrapEmbeddedHttps.setFactoryAppBeans(this.factoryAppBeans);
+      this.bootStrapEmbeddedHttps.setWebAppPath(webAppPath);
+      Security.addProvider(new BouncyCastleProvider());
+      refreshUi();
+    } catch (Exception e) {
+      this.logger.error(null, BootStrapEmbeddedHttpsSwing.class, null, e);
+      throw e;
     }
-    this.bootStrapEmbeddedHttps = new BootStrapEmbeddedHttps();
-    this.bootStrapEmbeddedHttps.setFactoryAppBeans(this.factoryAppBeans);
-    this.bootStrapEmbeddedHttps.setWebAppPath(webAppPath);
-    Security.addProvider(new BouncyCastleProvider());
-    refreshUi();
   }
 
   @Override
@@ -277,6 +295,7 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
       if (pAe.getSource() == this.btStart
         && this.bootStrapEmbeddedHttps.getServer() == null) {
         if (!this.isActionPerforming) {
+          setTitle(getMsg("title"));
           this.isActionPerforming = true;
           if (!this.isKeystoreCreated) {
             Long ajl = (Long) ftfAjettyIn.getValue();
@@ -299,6 +318,7 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
       } else if (pAe.getSource() == this.btStop
         && this.bootStrapEmbeddedHttps.getIsStarted()) {
         if (!this.isActionPerforming) {
+          setTitle(getMsg("title"));
           this.isActionPerforming = true;
           this.lastActionStartDate = new Date().getTime();
           StopThread stThread = new StopThread();
@@ -323,8 +343,8 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
           .browse(new URI(this.btBrowse.getText()));
       }
     } catch (Exception ex) {
-      ex.printStackTrace();
-      setTitle("Error!");
+      setTitle("Error! See starter.log!");
+      this.logger.error(null, BootStrapEmbeddedHttpsSwing.class, null, ex);
     }
   }
 
@@ -382,11 +402,12 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
           .getCertificate("AJettyFileExch" + this.ajettyIn).getPublicKey();
       } finally {
         if (fis != null) {
-         try {
-           fis.close();
-         } catch (Exception e2) {
-           e2.printStackTrace();
-         }
+          try {
+            fis.close();
+          } catch (Exception e2) {
+            this.logger
+              .error(null, BootStrapEmbeddedHttpsSwing.class, null, e2);
+          }
         }
       }
       if (certCa != null) {
@@ -404,7 +425,8 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
             try {
               pemWriter.close();
             } catch (Exception e2) {
-              e2.printStackTrace();
+              this.logger
+                .error(null, BootStrapEmbeddedHttpsSwing.class, null, e2);
             }
           }
         }
@@ -422,7 +444,8 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
             try {
               fos.close();
             } catch (Exception e2) {
-              e2.printStackTrace();
+              this.logger
+                .error(null, BootStrapEmbeddedHttpsSwing.class, null, e2);
             }
           }
         }
@@ -435,13 +458,14 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
         pkcs12Store.load(fis, ksPassword);
       } catch (Exception e) {
         pkcs12Store = null;
-        e.printStackTrace();
+        this.logger.error(null, BootStrapEmbeddedHttpsSwing.class, null, e);
       } finally {
         if (fis != null) {
           try {
             fis.close();
           } catch (Exception e2) {
-            e2.printStackTrace();
+            this.logger
+              .error(null, BootStrapEmbeddedHttpsSwing.class, null, e2);
           }
         }
       }
@@ -518,7 +542,6 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
           bses.setVisible(true);
           bses.setCryptoService(new CryptoService());
         } catch (Exception ex) {
-          ex.printStackTrace();
           if (bses != null) {
             bses.dispose();
           }
@@ -564,7 +587,8 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
               .bootStrapEmbeddedHttps.stopServer();
             BootStrapEmbeddedHttpsSwing.this.refreshUi();
           } catch (Exception ex) {
-            ex.printStackTrace();
+            BootStrapEmbeddedHttpsSwing.this.logger
+              .error(null, BootStrapEmbeddedHttpsSwing.class, null, ex);
           }
         }
         BootStrapEmbeddedHttpsSwing.this.setVisible(false);
@@ -587,7 +611,8 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
         try {
           BootStrapEmbeddedHttpsSwing.this.bootStrapEmbeddedHttps.startServer();
         } catch (Exception e) {
-          e.printStackTrace();
+          BootStrapEmbeddedHttpsSwing.this.logger
+            .error(null, BootStrapEmbeddedHttpsSwing.class, null, e);
         }
       }
       BootStrapEmbeddedHttpsSwing.this.isActionPerforming = false;
@@ -607,7 +632,8 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
         try {
           BootStrapEmbeddedHttpsSwing.this.bootStrapEmbeddedHttps.stopServer();
         } catch (Exception e) {
-          e.printStackTrace();
+          BootStrapEmbeddedHttpsSwing.this.logger
+            .error(null, BootStrapEmbeddedHttpsSwing.class, null, e);
         }
       }
       BootStrapEmbeddedHttpsSwing.this.isActionPerforming = false;
@@ -741,5 +767,21 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
    **/
   public final void setCryptoService(final CryptoService pCryptoService) {
     this.cryptoService = pCryptoService;
+  }
+
+  /**
+   * <p>Getter for logger.</p>
+   * @return ILogger
+   **/
+  public final ILogger getLogger() {
+    return this.logger;
+  }
+
+  /**
+   * <p>Setter for logger.</p>
+   * @param pLogger reference
+   **/
+  public final void setLogger(final ILogger pLogger) {
+    this.logger = pLogger;
   }
 }

@@ -1,5 +1,4 @@
-site: http://www.beigesoft.org
-or https://sites.google.com/site/beigesoftware
+site: https://sites.google.com/site/beigesoftware
 
 A-Jetty is multiplatform Jetty 9.2 adapted for Android, it can run precompiled JSP/JSTL.
 
@@ -20,6 +19,17 @@ Oracle JEE (Servlet API...)
 CDDL + GPLv2 with classpath exception
 https://javaee.github.io/glassfish/LICENSE
 
+part of Apache Tomcat/JSTL by Apache Software Foundation, adapted for Android to precompile and run JSP/JSTL:
+The Apache Software License, Version 2.0
+http://www.apache.org/licenses/LICENSE-2.0.txt
+
+Bouncy Castle Crypto APIs by the Legion of the Bouncy Castle Inc:
+Bouncy Castle License (actually MIT)
+http://www.bouncycastle.org/licence.html
+
+SLF4J by QOS.ch:
+MIT License
+http://www.opensource.org/licenses/mit-license.php
 
 Features:
 

@@ -739,3 +739,11 @@ License instead of this License.
 
 Oracle Java Servlet API - CDDL + GPLv2 with classpath exception
 see https://javaee.github.io/glassfish/LICENSE
+
+Bouncy Castle Crypto APIs by the Legion of the Bouncy Castle Inc:
+Bouncy Castle License (actually MIT)
+http://www.bouncycastle.org/licence.html
+
+SLF4J by QOS.ch:
+MIT License
+http://www.opensource.org/licenses/mit-license.php

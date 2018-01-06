@@ -12,19 +12,19 @@
     <fileSet>
       <useDefaultExcludes>false</useDefaultExcludes>
       <includes>
-        <include>**/src/**</include>
-        <include>/.gitignore</include>
-        <include>/assembly.xml</include>
-        <include>/findbug-exclude.xml</include>
-        <include>/checkstyle-suppressions.xml</include>
-        <include>/maven-central-deploy.sh</include>
-        <include>/LICENSE</include>
-        <include>/README.txt</include>
-        <include>**/pom.xml</include>
-        <include>**/build.xml</include>
+        <include>**${file.separator}src${file.separator}**</include>
+        <include>${file.separator}.gitignore</include>
+        <include>${file.separator}assembly.xml</include>
+        <include>${file.separator}findbug-exclude.xml</include>
+        <include>${file.separator}checkstyle-suppressions.xml</include>
+        <include>${file.separator}maven-central-deploy.sh</include>
+        <include>${file.separator}LICENSE</include>
+        <include>${file.separator}README.txt</include>
+        <include>**${file.separator}pom.xml</include>
+        <include>**${file.separator}build.xml</include>
       </includes>
       <excludes>
-        <exclude>**/src/uml/**</exclude>
+        <exclude>**${file.separator}src${file.separator}uml${file.separator}**</exclude>
       </excludes>
     </fileSet>
   </fileSets>

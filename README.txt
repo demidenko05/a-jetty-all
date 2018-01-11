@@ -19,9 +19,13 @@ Oracle JEE (Servlet API...)
 CDDL + GPLv2 with classpath exception
 https://javaee.github.io/glassfish/LICENSE
 
-part of Apache Tomcat/JSTL by Apache Software Foundation, adapted for Android to precompile and run JSP/JSTL:
+https://github.com/demidenko05/a-tomcat-all - part of Apache Tomcat/JSTL by Apache Software Foundation, adapted for Android to precompile and run JSP/JSTL:
 The Apache Software License, Version 2.0
 http://www.apache.org/licenses/LICENSE-2.0.txt
+
+https://github.com/demidenko05/a-javabeans8 - adapted OpenJDK8 javabeans for Android:
+GNU General Public License, version 2, with the Classpath Exception
+http://openjdk.java.net/legal/gplv2+ce.html
 
 Bouncy Castle Crypto APIs by the Legion of the Bouncy Castle Inc:
 Bouncy Castle License (actually MIT)

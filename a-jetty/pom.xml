@@ -71,7 +71,7 @@
                   </includes>
                   <storepass>${signpass}</storepass>
                   <keypass>${signpass}</keypass>
-                  <alias>bs-key</alias>
+                  <alias>${signalias}</alias>
                 </configuration>
               </execution>
             </executions>

@@ -120,6 +120,9 @@ public class CryptoService implements ICryptoService {
                 || passw.contains("zxcvb") || passw.contains("bvcxz")
               || passw.contains("gfdsa")) {
       return getMsg("noQwerty");
+    } else if (passw.contains("raccooneatstone")
+      || passw.contains("nraccooteaeston")) {
+      return getMsg("noDemoPassw");
     } else if (passw.contains("2345") || passw.contains("admin")
       || passw.contains("user") || passw.contains("5432")
         || passw.contains("5678") || passw.contains("9876")

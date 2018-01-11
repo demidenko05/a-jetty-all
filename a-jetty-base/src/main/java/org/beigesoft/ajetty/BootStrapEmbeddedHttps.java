@@ -13,6 +13,7 @@ package org.beigesoft.ajetty;
  */
 
 import java.io.File;
+import java.security.KeyStore;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.Connector;
@@ -101,9 +102,14 @@ public class BootStrapEmbeddedHttps {
   private String cryptoProviderName = "BC";
 
   /**
-   * <p>Database realm service.</p>
+   * <p>Key-store.</p>
    **/
-  private DataBaseLoginService dataBaseLoginService;
+  private KeyStore keyStore;
+
+  /**
+   * <p>A-Jetty instance number.</p>
+   **/
+  private Integer ajettyIn;
 
   /**
    * <p>Create and configure server.</p>
@@ -111,15 +117,11 @@ public class BootStrapEmbeddedHttps {
    **/
   public final void createServer() throws Exception {
     try {
-      if (this.dataBaseLoginService == null) {
-        this.dataBaseLoginService = new DataBaseLoginService("JDBCRealm");
-      }
       File webappdir = new File(getWebAppPath());
       if (!webappdir.exists() || !webappdir.isDirectory()) {
         throw new Exception("Web app directory not found: " + getWebAppPath());
       }
       this.server = new Server();
-      server.addBean(this.dataBaseLoginService);
       SslContextFactory sslContextFactory = new SslContextFactory();
       sslContextFactory.setKeyStorePath(this.pkcs12File.getAbsolutePath());
       sslContextFactory.setKeyStorePassword(this.password);
@@ -141,15 +143,26 @@ public class BootStrapEmbeddedHttps {
       connector.setPort(this.port);
       connector.setIdleTimeout(500000);
       server.setConnectors(new Connector[] {connector});
+      // without different application context path
+      // authentication works badly in case of two A-Jetty instance
+      // with the same web-app context path:
       this.webAppContext = new WebAppContext(webappdir
-        .getAbsolutePath(), "/");
+        .getAbsolutePath(), "/bsa" + this.port + "/");
+      DataBaseLoginService dataBaseLoginService =
+        new DataBaseLoginService("JDBCRealm");
+      this.webAppContext.getSecurityHandler()
+        .setLoginService(dataBaseLoginService);
+      this.webAppContext.setAttribute("JDBCRealm", dataBaseLoginService);
       this.webAppContext.setFactoryAppBeans(getFactoryAppBeans());
       this.webAppContext.setDefaultsDescriptor(webappdir
         .getAbsolutePath() + File.separator + "webdefault.xml");
-      this.webAppContext.setAttribute("JDBCRealm", this.dataBaseLoginService);
+      this.webAppContext.setAttribute("ajettyKeystore", this.keyStore);
+      this.webAppContext.setAttribute("ajettyIn", this.ajettyIn);
+      this.webAppContext.setAttribute("ksPassword", this.password);
       this.server.setHandler(this.webAppContext);
     } catch (Exception e) {
       this.server = null;
+      this.webAppContext = null;
       throw e;
     }
   }
@@ -159,11 +172,16 @@ public class BootStrapEmbeddedHttps {
    * @throws Exception an Exception
    **/
   public final void startServer() throws Exception {
-    if (this.server == null) {
-      createServer();
+    try {
+      if (this.server == null) {
+        createServer();
+      }
+      this.server.start();
+      this.isStarted = true;
+    } catch (Exception e) {
+      this.server = null;
+      this.webAppContext = null;
     }
-    this.server.start();
-    this.isStarted = true;
   }
 
   /**
@@ -171,10 +189,14 @@ public class BootStrapEmbeddedHttps {
    * @throws Exception an Exception
    **/
   public final void stopServer() throws Exception {
-    this.server.stop();
-    this.server.destroy();
-    this.server = null;
-    this.isStarted = false;
+    try {
+      this.server.stop();
+      this.server.destroy();
+    } finally {
+      this.server = null;
+      this.webAppContext = null;
+      this.isStarted = false;
+    }
   }
 
   //Simple getters and setters:
@@ -346,5 +368,37 @@ public class BootStrapEmbeddedHttps {
    **/
   public final void setCryptoProviderName(final String pCryptoProviderName) {
     this.cryptoProviderName = pCryptoProviderName;
+  }
+
+  /**
+   * <p>Getter for keyStore.</p>
+   * @return KeyStore
+   **/
+  public final KeyStore getKeyStore() {
+    return this.keyStore;
+  }
+
+  /**
+   * <p>Setter for keyStore.</p>
+   * @param pKeyStore reference
+   **/
+  public final void setKeyStore(final KeyStore pKeyStore) {
+    this.keyStore = pKeyStore;
+  }
+
+  /**
+   * <p>Getter for ajettyIn.</p>
+   * @return Integer
+   **/
+  public final Integer getAjettyIn() {
+    return this.ajettyIn;
+  }
+
+  /**
+   * <p>Setter for ajettyIn.</p>
+   * @param pAjettyIn reference
+   **/
+  public final void setAjettyIn(final Integer pAjettyIn) {
+    this.ajettyIn = pAjettyIn;
   }
 }

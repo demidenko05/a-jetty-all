@@ -116,7 +116,7 @@
                   </includes>
                   <storepass>${signpass}</storepass>
                   <keypass>${signpass}</keypass>
-                  <alias>bs-key</alias>
+                  <alias>${signalias}</alias>
                 </configuration>
               </execution>
             </executions>
@@ -133,8 +133,8 @@
                   <goal>sign</goal>
                 </goals>
                 <configuration>
-                  <keyname>48E407CA</keyname>
-                  <passphraseServerId>48E407CA</passphraseServerId>
+                  <keyname>${gpgkeyname}</keyname>
+                  <passphraseServerId>${gpgkeyname}</passphraseServerId>
                 </configuration>
               </execution>
             </executions>
@@ -193,9 +193,7 @@
                 <!--Rule:AvoidUsingHardCodedIP is wrong-->
                 <exclude>org/beigesoft/ajetty/crypto/CryptoService.java</exclude>
                 <exclude>org/beigesoft/ajetty/BootStrap.java</exclude>
-                <exclude>org/beigesoft/ajetty/BootStrapEmbedded.java</exclude>
                 <exclude>org/beigesoft/ajetty/BootStrapEmbeddedHttps.java</exclude>
-                <exclude>org/beigesoft/ajetty/BootStrapEmbeddedSwing.java</exclude>
                 <exclude>org/beigesoft/ajetty/BootStrapEmbeddedHttpsSwing.java</exclude>
               </excludes>
             </configuration>

@@ -49,6 +49,7 @@ public class LoggerFileStd extends AILoggerLog {
   @Override
   protected final void createLogger() {
     LoggerFile log = new LoggerFile();
+    log.setIsCloseFileAfterRecord(true);
     if (this.fillerFileLogProperties == null) {
       this.fillerFileLogProperties = new FillerFileLogProperties();
     }

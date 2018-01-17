@@ -18,23 +18,15 @@
     <Bug pattern="DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED"/>
   </Match>
   <Match>
-    <Class name="org.beigesoft.ajetty.BootStrapEmbeddedSwing"/>
-    <Bug pattern="SE_BAD_FIELD_STORE"/>
-  </Match>
-  <Match>
-    <Class name="org.beigesoft.ajetty.BootStrapEmbeddedHttpsSwing"/>
-    <Bug pattern="SE_BAD_FIELD_STORE"/>
-  </Match>
-  <Match>
-    <Class name="org.beigesoft.ajetty.BootStrapEmbeddedSwing"/>
-    <Bug pattern="DM_EXIT"/>
-  </Match>
-  <Match>
-    <Class name="org.beigesoft.ajetty.BootStrapEmbeddedHttpsSwing"/>
-    <Bug pattern="DM_EXIT"/>
+     <Class name="org.beigesoft.ajetty.BootStrapEmbeddedHttpsSwing" />
+     <Bug pattern="SE_BAD_FIELD_STORE" />
   </Match>
   <Match>
     <Class name="org.beigesoft.ajetty.BootStrapEmbeddedHttpsSwing$1"/>
+    <Bug pattern="DM_EXIT"/>
+  </Match>
+  <Match>
+    <Class name="org.beigesoft.ajetty.BootStrapEmbeddedMain$1"/>
     <Bug pattern="DM_EXIT"/>
   </Match>
   <Match>
@@ -68,6 +60,14 @@
   </Match>
   <Match>
      <Class name="org.beigesoft.ajetty.UserCredentials" />
+     <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  <Match>
+     <Class name="org.beigesoft.ajetty.BootStrapEmbeddedMain" />
+     <Bug pattern="EI_EXPOSE_REP" />
+  </Match>
+  <Match>
+     <Class name="org.beigesoft.ajetty.BootStrapEmbeddedMain" />
      <Bug pattern="EI_EXPOSE_REP2" />
   </Match>
 </FindBugsFilter>

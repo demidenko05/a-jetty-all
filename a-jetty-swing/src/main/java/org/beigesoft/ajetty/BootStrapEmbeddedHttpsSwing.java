@@ -12,20 +12,10 @@ package org.beigesoft.ajetty;
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
  */
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.OutputStreamWriter;
-import java.io.FileOutputStream;
 import java.util.Date;
-import java.util.ResourceBundle;
 import java.net.URI;
 import java.net.URL;
 import java.text.NumberFormat;
-import java.security.PublicKey;
-import java.security.KeyStore;
-import java.security.Security;
-import java.security.cert.Certificate;
-import java.nio.charset.Charset;
 
 import java.awt.GridLayout;
 import java.awt.Desktop;
@@ -45,14 +35,6 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ImageIcon;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
-
-import org.beigesoft.afactory.IFactoryAppBeans;
-import org.beigesoft.ajetty.crypto.CryptoService;
-import org.beigesoft.log.ILogger;
-import org.beigesoft.log.LoggerFile;
-
 /**
  * <p>
  * BootStrapEmbeddedHttpsSwing launches A-Jetty as host 127.0.0.1 on opted port
@@ -65,192 +47,107 @@ import org.beigesoft.log.LoggerFile;
  * @author Yury Demidenko
  */
 public class BootStrapEmbeddedHttpsSwing extends JFrame
-  implements ActionListener {
-
-  /**
-   * <p>Factory app-beans - only for WEB-app class loader.</p>
-   **/
-  private final IFactoryAppBeans factoryAppBeans;
-
-  /**
-   * <p>Bootstrap.</p>
-   **/
-  private final BootStrapEmbeddedHttps bootStrapEmbeddedHttps;
+  implements ActionListener, IBootStrapIFace {
 
   //Interface:
   /**
    * <p>Label A-Jetty instance number.</p>
    **/
-  private final JLabel lbAjettyIn;
+  private JLabel lbAjettyIn;
 
   /**
    * <p>A-Jetty instance number.</p>
    **/
-  private final JFormattedTextField ftfAjettyIn;
+  private JFormattedTextField ftfAjettyIn;
 
   /**
    * <p>Label keystore password.</p>
    **/
-  private final JLabel lbKeystorePw;
+  private JLabel lbKeystorePw;
 
   /**
    * <p>Keystore password.</p>
    **/
-  private final JPasswordField pfKeystorePw;
+  private JPasswordField pfKeystorePw;
 
   /**
    * <p>Label keystore password conformation.</p>
    **/
-  private final JLabel lbKeystorePwc;
+  private JLabel lbKeystorePwc;
 
   /**
    * <p>A-Jetty instance password conformation.</p>
    **/
-  private final JPasswordField pfKeystorePwc;
+  private JPasswordField pfKeystorePwc;
 
   /**
    * <p>Label port.</p>
    **/
-  private final JLabel lbPort;
+  private JLabel lbPort;
 
   /**
    * <p>Combo-box port.</p>
    **/
-  private final JComboBox<Integer> cmbPort;
+  private JComboBox<Integer> cmbPort;
 
   /**
    * <p>Button start.</p>
    **/
-  private final JButton btStart;
+  private JButton btStart;
 
   /**
    * <p>Button refresh.</p>
    **/
-  private final JButton btRefresh;
+  private JButton btRefresh;
 
   /**
    * <p>Button stop.</p>
    **/
-  private final JButton btStop;
+  private JButton btStop;
 
   /**
    * <p>Button launch browser.</p>
    **/
-  private final JButton btBrowse;
+  private JButton btBrowse;
 
   /**
-   * <p>I18N.</p>
+   * <p>Main boot strap.</p>
    **/
-  private final ResourceBundle messages;
+  private BootStrapEmbeddedMain mainBootStrap;
 
   /**
-   * <p>Flag to avoid double invoke and custom synchronization.</p>
-   **/
-  private boolean isActionPerforming = false;
-
-  /**
-   * <p>Time of last action start.</p>
-   **/
-  private long lastActionStartDate;
-
-  /**
-   * <p>A-Jetty instance number.</p>
-   **/
-  private Integer ajettyIn;
-
-  /**
-   * <p>Flag is keystore created.</p>
-   **/
-  private boolean isKeystoreCreated;
-
-  /**
-   * <p>Crypto service.</p>
-   **/
-  private CryptoService cryptoService;
-
-  /**
-   * <p>Logger.</p>
-   **/
-  private ILogger logger;
-
-  /**
-   * <p>Is debug.</p>
-   **/
-  private boolean isDebug = false;
-
-  /**
-   * <p>Key-store.</p>
-   **/
-  private KeyStore keyStore;
-
-  /**
-   * <p>Key-store password.</p>
-   **/
-  private char[] ksPassword;
-
-  /**
-   * <p>Only constructor.</p>
+   * <p>Starts interface.</p>
    * @throws Exception any
    **/
-  public BootStrapEmbeddedHttpsSwing() throws Exception {
-    String appDir = null;
-    try {
-      File jarBoot = new File(BootStrapEmbeddedHttpsSwing.class
-        .getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-      appDir = jarBoot.getParent();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    if (appDir == null) {
-      appDir = System.getProperty("user.dir");
-    }
-    if (this.logger == null) {
-      LoggerFile log = new LoggerFile();
-      log.setFilePath(appDir + File.separator + "starter");
-      log.setIsCloseFileAfterRecord(true);
-      this.logger = log;
-    }
-    try {
-      java.util.List<String> arguments = java.lang.management.ManagementFactory
-        .getRuntimeMXBean().getInputArguments();
-      for (String str : arguments) {
-        if (str.contains("jdwp") || str.contains("debug")) {
-          this.isDebug = true;
-        }
-      }
-    } catch (Exception e) {
-      this.logger.warn(null, BootStrapEmbeddedHttpsSwing.class,
-        "IS DEBUG CHECKING: ", e);
-    }
+  public final void startInterface() throws Exception {
     try {
       setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
       // Interface:
       URL iconURL = getClass().getResource("/favicon.png");
       ImageIcon icon = new ImageIcon(iconURL);
       setIconImage(icon.getImage());
-      this.messages = ResourceBundle.getBundle("MessagesAjetty");
-      if (this.isDebug) {
+      if (this.mainBootStrap.getIsDebug()) {
         setTitle("DEBUGGING IS ON!!!");
       } else {
-        setTitle(getMsg("title"));
+        setTitle(this.mainBootStrap.getMsg("title"));
       }
       GridLayout layout = new GridLayout(12, 1);
       layout.setVgap(10);
       setLayout(layout);
-      this.lbAjettyIn = new JLabel(getMsg("AJettyIn"));
+      this.lbAjettyIn = new JLabel(this.mainBootStrap.getMsg("AJettyIn"));
       add(this.lbAjettyIn);
       this.ftfAjettyIn = new JFormattedTextField(NumberFormat
         .getIntegerInstance());
       add(this.ftfAjettyIn);
-      this.lbKeystorePw = new JLabel(getMsg("KeystorePw"));
+      this.lbKeystorePw = new JLabel(this.mainBootStrap.getMsg("KeystorePw"));
       add(this.lbKeystorePw);
       this.pfKeystorePw = new JPasswordField();
       add(this.pfKeystorePw);
-      this.lbKeystorePwc = new JLabel(getMsg("KeystorePwc"));
+      this.lbKeystorePwc = new JLabel(this.mainBootStrap.getMsg("KeystorePwc"));
       add(this.lbKeystorePwc);
       this.pfKeystorePwc = new JPasswordField();
       add(this.pfKeystorePwc);
-      this.lbPort = new JLabel(getMsg("port"));
+      this.lbPort = new JLabel(this.mainBootStrap.getMsg("port"));
       add(this.lbPort);
       this.cmbPort = new JComboBox<Integer>();
       Integer p8443 = 8443;
@@ -261,13 +158,13 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
       this.cmbPort.addItem(new Integer(8447));
       this.cmbPort.setSelectedItem(p8443);
       add(this.cmbPort);
-      this.btStart = new JButton(getMsg("start"));
+      this.btStart = new JButton(this.mainBootStrap.getMsg("start"));
       this.btStart.addActionListener(this);
       add(this.btStart);
-      this.btStop = new JButton(getMsg("stop"));
+      this.btStop = new JButton(this.mainBootStrap.getMsg("stop"));
       this.btStop.addActionListener(this);
       add(this.btStop);
-      this.btRefresh = new JButton(getMsg("refresh"));
+      this.btRefresh = new JButton(this.mainBootStrap.getMsg("refresh"));
       this.btRefresh.addActionListener(this);
       add(this.btRefresh);
       this.btBrowse = new JButton();
@@ -284,38 +181,11 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
       setPreferredSize(new Dimension(width, height));
       pack();
       setLocationRelativeTo(null);
-      // A-Jetty:
-      this.factoryAppBeans = new FactoryAppBeansEmbedded();
-      String webAppPath = appDir + File.separator + "webapp";
-      File webappdir = new File(webAppPath);
-      if (!webappdir.exists() || !webappdir.isDirectory()) {
-        throw new Exception("Web app directory not found: " + webAppPath);
-      }
-      // keystore placed into [webappdir-parent]/ks folder:
-      File ksDir = new File(appDir + File.separator + "ks");
-      if (!ksDir.exists() && !ksDir.mkdir()) {
-        throw new Exception("Can't create ks directory: " + ksDir);
-      }
-      File[] lstFl = ksDir.listFiles();
-      String nmpref = "ajettykeystore.";
-      if (lstFl != null) {
-        if (lstFl.length > 1
-          || lstFl.length == 1 && !lstFl[0].isFile()) {
-          throw new Exception("KS directory must contains only ks file!!!");
-        } else if (lstFl.length == 1 && lstFl[0].isFile()
-          && lstFl[0].getName().startsWith(nmpref)) {
-          String ajettyInStr = lstFl[0].getName().replace(nmpref, "");
-          this.ajettyIn = Integer.parseInt(ajettyInStr);
-          this.isKeystoreCreated = true;
-        }
-      }
-      this.bootStrapEmbeddedHttps = new BootStrapEmbeddedHttps();
-      this.bootStrapEmbeddedHttps.setFactoryAppBeans(this.factoryAppBeans);
-      this.bootStrapEmbeddedHttps.setWebAppPath(webAppPath);
-      Security.addProvider(new BouncyCastleProvider());
+      setVisible(true);
       refreshUi();
     } catch (Exception e) {
-      this.logger.error(null, BootStrapEmbeddedHttpsSwing.class, null, e);
+      this.mainBootStrap.getLogger()
+        .error(null, BootStrapEmbeddedHttpsSwing.class, null, e);
       throw e;
     }
   }
@@ -324,61 +194,69 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
   public final void actionPerformed(final ActionEvent pAe) {
     try {
       if (pAe.getSource() == this.btStart
-        && !this.bootStrapEmbeddedHttps.getIsStarted()) {
-        if (!this.isActionPerforming) {
-          if (this.isDebug) {
+        && !this.mainBootStrap.getBootStrapEmbeddedHttps().getIsStarted()) {
+        if (!this.mainBootStrap.getIsActionPerforming()) {
+          if (this.mainBootStrap.getIsDebug()) {
             setTitle("DEBUGGING IS ON!!!");
           } else {
-            setTitle(getMsg("title"));
+            setTitle(this.mainBootStrap.getMsg("title"));
           }
-          this.isActionPerforming = true;
-          if (!this.isKeystoreCreated) {
+          this.mainBootStrap.setIsActionPerforming(true);
+          if (!this.mainBootStrap.getIsKeystoreCreated()) {
             Long ajl = (Long) ftfAjettyIn.getValue();
             if (ajl != null) {
               try {
-                this.ajettyIn = Integer.parseInt(ajl.toString());
+                this.mainBootStrap.setAjettyIn(Integer.parseInt(ajl
+                  .toString()));
               } catch (Exception e) {
                 e.printStackTrace();
               }
             }
           }
-          if (this.ajettyIn == null) {
-            JOptionPane.showMessageDialog(this, getMsg("EnterAjettyNumber"),
-              getMsg("error"), JOptionPane.ERROR_MESSAGE);
-            this.isActionPerforming = false;
+          if (this.mainBootStrap.getAjettyIn() == null) {
+            JOptionPane.showMessageDialog(this, this.mainBootStrap
+              .getMsg("EnterAjettyNumber"), this.mainBootStrap.getMsg("error"),
+                JOptionPane.ERROR_MESSAGE);
+            this.mainBootStrap.setIsActionPerforming(false);
             return;
           }
-          startAjetty();
+          this.mainBootStrap.setKsPassword(this.pfKeystorePw.getPassword());
+          this.mainBootStrap.setKsPasswordConf(this
+            .pfKeystorePwc.getPassword());
+          this.mainBootStrap.setPort((Integer) this.cmbPort.getSelectedItem());
+          this.mainBootStrap.startAjetty();
+          refreshUi();
         }
       } else if (pAe.getSource() == this.btStop
-        && this.bootStrapEmbeddedHttps.getIsStarted()) {
-        if (!this.isActionPerforming) {
-          if (this.isDebug) {
+        && this.mainBootStrap.getBootStrapEmbeddedHttps().getIsStarted()) {
+        if (!this.mainBootStrap.getIsActionPerforming()) {
+          if (this.mainBootStrap.getIsDebug()) {
             setTitle("DEBUGGING IS ON!!!");
           } else {
-            setTitle(getMsg("title"));
+            setTitle(this.mainBootStrap.getMsg("title"));
           }
-          this.isActionPerforming = true;
-          this.lastActionStartDate = new Date().getTime();
-          StopThread stThread = new StopThread();
-          stThread.start();
+          this.mainBootStrap.setIsActionPerforming(true);
+          this.mainBootStrap.setLastActionStartDate(new Date().getTime());
+          this.mainBootStrap.stopAjetty();
           refreshUi();
         }
       } else if (pAe.getSource() == this.btRefresh) {
-        if (this.isDebug) {
+        if (this.mainBootStrap.getIsDebug()) {
           setTitle("DEBUGGING IS ON!!!");
         } else {
-          setTitle(getMsg("title"));
+          setTitle(this.mainBootStrap.getMsg("title"));
         }
-        if (this.isActionPerforming) {
+        if (this.mainBootStrap.getIsActionPerforming()) {
           // it was only time when server has started but
           // interface not respond (Class was synchronized)
           // The reason was cause either A-Jetty - did not exit from "start"
           // (so class was locked by start thread)
           // or Swing Interface itself get frozen
           long currDate = new Date().getTime();
-          if (currDate - this.lastActionStartDate > 120000) {
-            this.isActionPerforming = false;
+          if (currDate - this.mainBootStrap.getLastActionStartDate() > 120000) {
+            this.mainBootStrap.setIsActionPerforming(false);
+            this.mainBootStrap.getLogger()
+              .error(null, BootStrapEmbeddedHttpsSwing.class, "Frozen!!!");
           }
         }
         refreshUi();
@@ -387,159 +265,30 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
           .browse(new URI(this.btBrowse.getText()));
       }
     } catch (Exception ex) {
-      this.isActionPerforming = false;
+      this.mainBootStrap.setIsActionPerforming(false);
       setTitle("Error! See starter.log!");
-      this.logger.error(null, BootStrapEmbeddedHttpsSwing.class, null, ex);
+      this.mainBootStrap.getLogger()
+        .error(null, BootStrapEmbeddedHttpsSwing.class, null, ex);
     }
   }
 
   /**
-   * <p>It starts A-Jetty.</p>
-   * @throws Exception an Exception
+   * <p>Show error message.</p>
+   * @param pError message
    **/
-  public final void startAjetty() throws Exception {
-    File webappdir = new File(this.bootStrapEmbeddedHttps
-      .getWebAppPath());
-    String ksPath = webappdir.getParent() + File.separator + "ks";
-    File pks12File = new File(ksPath + File.separator
-        + "ajettykeystore." + this.ajettyIn);
-    this.ksPassword = this.pfKeystorePw.getPassword();
-    if (!pks12File.exists()) {
-      char[] ksPasswordc = this.pfKeystorePwc.getPassword();
-      boolean noMatch = false;
-      if (this.ksPassword.length != ksPasswordc.length) {
-        noMatch = true;
-      } else {
-        for (int i = 0; i < this.ksPassword.length; i++) {
-          if (this.ksPassword[i] != ksPasswordc[i]) {
-            noMatch = true;
-            break;
-          }
-        }
-      }
-      if (noMatch) {
-        JOptionPane.showMessageDialog(this, getMsg("PasswordRepeatNoMatch"),
-          getMsg("error"), JOptionPane.ERROR_MESSAGE);
-        this.isActionPerforming = false;
-        return;
-      }
-      String isPswStrRez = this.cryptoService
-        .isPasswordStrong(this.ksPassword);
-      if (isPswStrRez != null) {
-        JOptionPane.showMessageDialog(this, isPswStrRez,
-          getMsg("error"), JOptionPane.ERROR_MESSAGE);
-        this.isActionPerforming = false;
-        return;
-      }
-      this.cryptoService.createKeyStoreWithCredentials(pks12File
-        .getParent(), this.ajettyIn, this.ksPassword);
-      FileInputStream fis = null;
-      Certificate certCa = null;
-      PublicKey fileExchPub = null;
-      try {
-        this.keyStore = KeyStore.getInstance("PKCS12", "BC");
-        fis = new FileInputStream(pks12File);
-        this.keyStore.load(fis, this.ksPassword);
-        this.isKeystoreCreated = true;
-        certCa = this.keyStore.getCertificate("AJettyCa" + this.ajettyIn);
-        fileExchPub = this.keyStore
-          .getCertificate("AJettyFileExch" + this.ajettyIn).getPublicKey();
-      } finally {
-        if (fis != null) {
-          try {
-            fis.close();
-          } catch (Exception e2) {
-            this.logger
-              .error(null, BootStrapEmbeddedHttpsSwing.class, null, e2);
-          }
-        }
-      }
-      if (certCa != null) {
-        File pemFl = new File(pks12File.getParentFile().getParent()
-          + File.separator + "ajetty-ca.pem");
-        JcaPEMWriter pemWriter = null;
-        try {
-          OutputStreamWriter osw = new OutputStreamWriter(
-            new FileOutputStream(pemFl),
-              Charset.forName("ASCII").newEncoder());
-          pemWriter = new JcaPEMWriter(osw);
-          pemWriter.writeObject(certCa);
-          pemWriter.flush();
-        } finally {
-          if (pemWriter != null) {
-            try {
-              pemWriter.close();
-            } catch (Exception e2) {
-              this.logger
-                .error(null, BootStrapEmbeddedHttpsSwing.class, null, e2);
-            }
-          }
-        }
-      }
-      if (fileExchPub != null) {
-        File pubFl = new File(pks12File.getParentFile().getParent()
-          + File.separator + "ajetty-file-exch" + this.ajettyIn + ".kpub");
-        FileOutputStream fos = null;
-        try {
-          fos = new FileOutputStream(pubFl);
-          fos.write(fileExchPub.getEncoded());
-          fos.flush();
-        } finally {
-          if (fos != null) {
-            try {
-              fos.close();
-            } catch (Exception e2) {
-              this.logger
-                .error(null, BootStrapEmbeddedHttpsSwing.class, null, e2);
-            }
-          }
-        }
-      }
-    } else {
-      FileInputStream fis = null;
-      try {
-        this.keyStore = KeyStore.getInstance("PKCS12", "BC");
-        fis = new FileInputStream(pks12File);
-        this.keyStore.load(fis, this.ksPassword);
-      } catch (Exception e) {
-        this.keyStore = null;
-        this.logger.error(null, BootStrapEmbeddedHttpsSwing.class, null, e);
-      } finally {
-        if (fis != null) {
-          try {
-            fis.close();
-          } catch (Exception e2) {
-            this.logger
-              .error(null, BootStrapEmbeddedHttpsSwing.class, null, e2);
-          }
-        }
-      }
-      if (this.keyStore == null) {
-        JOptionPane.showMessageDialog(this, getMsg("passwordDoNotMatch"),
-          getMsg("error"), JOptionPane.ERROR_MESSAGE);
-        this.isActionPerforming = false;
-        return;
-      }
-    }
-    this.bootStrapEmbeddedHttps.setHttpsAlias("AJettyHttps" + this.ajettyIn);
-    this.bootStrapEmbeddedHttps.setPkcs12File(pks12File);
-    this.bootStrapEmbeddedHttps.setPassword(new String(this.ksPassword));
-    this.bootStrapEmbeddedHttps.setKeyStore(this.keyStore);
-    this.bootStrapEmbeddedHttps.setAjettyIn(this.ajettyIn);
-    this.bootStrapEmbeddedHttps.setPort(
-      (Integer) this.cmbPort.getSelectedItem());
-    this.lastActionStartDate = new Date().getTime();
-    StartThread stThread = new StartThread();
-    stThread.start();
-    refreshUi();
+  @Override
+  public final void showError(final String pError) {
+    JOptionPane.showMessageDialog(this, pError,
+      this.mainBootStrap.getMsg("error"), JOptionPane.ERROR_MESSAGE);
   }
 
   /**
    * <p>Refresh user interface.</p>
    **/
+  @Override
   public final void refreshUi() {
-    if (this.isActionPerforming) {
-      this.btBrowse.setText(getMsg("wait"));
+    if (this.mainBootStrap.getIsActionPerforming()) {
+      this.btBrowse.setText(this.mainBootStrap.getMsg("wait"));
       this.cmbPort.setEnabled(false);
       this.btStart.setEnabled(false);
       this.btStop.setEnabled(false);
@@ -547,7 +296,7 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
       this.ftfAjettyIn.setEnabled(false);
       this.pfKeystorePwc.setEnabled(false);
     } else {
-      if (this.bootStrapEmbeddedHttps.getIsStarted()) {
+      if (this.mainBootStrap.getBootStrapEmbeddedHttps().getIsStarted()) {
         this.btBrowse.setText("https://localhost:"
           + this.cmbPort.getSelectedItem() + "/bsa"
             + this.cmbPort.getSelectedItem());
@@ -559,15 +308,15 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
         this.btStop.setEnabled(true);
         this.btBrowse.setEnabled(true);
       } else {
-        if (this.isKeystoreCreated) {
+        if (this.mainBootStrap.getIsKeystoreCreated()) {
           this.ftfAjettyIn.setEnabled(false);
           this.pfKeystorePwc.setEnabled(false);
-          this.ftfAjettyIn.setText(this.ajettyIn.toString());
+          this.ftfAjettyIn.setText(this.mainBootStrap.getAjettyIn().toString());
         } else {
           this.ftfAjettyIn.setEnabled(true);
           this.pfKeystorePwc.setEnabled(true);
         }
-        this.btBrowse.setText(getMsg("stopped"));
+        this.btBrowse.setText(this.mainBootStrap.getMsg("stopped"));
         this.pfKeystorePw.setEnabled(true);
         this.cmbPort.setEnabled(true);
         this.btStart.setEnabled(true);
@@ -577,143 +326,46 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
     }
   }
 
-  /**
-   * <p>This start Jetty with SWING interface.</p>
-   * @param pArgs arguments
-   **/
-  public static final void main(final String[] pArgs) {
-    java.awt.EventQueue.invokeLater(new Runnable() {
-      public void run() {
-        BootStrapEmbeddedHttpsSwing bses = null;
-        try {
-          bses = new BootStrapEmbeddedHttpsSwing();
-          bses.setVisible(true);
-          bses.setCryptoService(new CryptoService());
-        } catch (Exception ex) {
-          if (bses != null) {
-            bses.dispose();
-          }
-          System.exit(0);
-        }
-      }
-    });
-  }
-
-  /**
-   * <p>To override odd behavior standard I18N.</p>
-   * @param pKey key
-   * @return i18n message
-   **/
-  public final String getMsg(final String pKey) {
-    try {
-      return this.messages.getString(pKey);
-    } catch (Exception e) {
-      return "[" + pKey + "]";
-    }
-  }
-
   //Inner classes:
   /**
    * <p>Stop A-Jetty on close.</p>
    **/
-  private final WindowListener windowListener = new WindowAdapter() {
+  private WindowListener windowListener = new WindowAdapter() {
 
     @Override
     public final void windowClosing(final WindowEvent e) {
-      if (BootStrapEmbeddedHttpsSwing.this.isActionPerforming) {
+      if (BootStrapEmbeddedHttpsSwing.this.mainBootStrap
+        .getIsActionPerforming()) {
         long currDate = new Date().getTime();
         if (currDate - BootStrapEmbeddedHttpsSwing
-          .this.lastActionStartDate > 120000) {
-          BootStrapEmbeddedHttpsSwing.this.isActionPerforming = false;
+          .this.mainBootStrap.getLastActionStartDate() > 120000) {
+          BootStrapEmbeddedHttpsSwing.this.mainBootStrap
+            .setIsActionPerforming(false);
+          BootStrapEmbeddedHttpsSwing.this.mainBootStrap.getLogger()
+            .error(null, BootStrapCli.class, "Frozen!!!");
         }
       }
-      if (!BootStrapEmbeddedHttpsSwing.this.isActionPerforming) {
+      if (!BootStrapEmbeddedHttpsSwing.this.mainBootStrap
+        .getIsActionPerforming()) {
         if (BootStrapEmbeddedHttpsSwing.this
-          .bootStrapEmbeddedHttps.getServer() != null) {
+          .mainBootStrap.getBootStrapEmbeddedHttps().getServer() != null) {
           try {
             BootStrapEmbeddedHttpsSwing.this
-              .bootStrapEmbeddedHttps.stopServer();
+              .mainBootStrap.getBootStrapEmbeddedHttps().stopServer();
             BootStrapEmbeddedHttpsSwing.this.refreshUi();
           } catch (Exception ex) {
-            BootStrapEmbeddedHttpsSwing.this.logger
+            BootStrapEmbeddedHttpsSwing.this.mainBootStrap.getLogger()
               .error(null, BootStrapEmbeddedHttpsSwing.class, null, ex);
           }
         }
         BootStrapEmbeddedHttpsSwing.this.setVisible(false);
         BootStrapEmbeddedHttpsSwing.this.dispose();
-        System.exit(0); // do not exit without it
+        System.exit(0); // do not exit without it TODO some threads alive?
       }
-    }
-  };
-
-
-  /**
-   * <p>Thread to start A-Jetty.</p>
-   */
-  private class StartThread extends Thread {
-
-    @Override
-    public void run() {
-      if (!BootStrapEmbeddedHttpsSwing
-        .this.bootStrapEmbeddedHttps.getIsStarted()) {
-        try {
-          BootStrapEmbeddedHttpsSwing.this.bootStrapEmbeddedHttps.startServer();
-        } catch (Exception e) {
-          BootStrapEmbeddedHttpsSwing.this.logger
-            .error(null, BootStrapEmbeddedHttpsSwing.class, null, e);
-        }
-      }
-      BootStrapEmbeddedHttpsSwing.this.isActionPerforming = false;
-      BootStrapEmbeddedHttpsSwing.this.refreshUi();
-    }
-  };
-
-  /**
-   * <p>Thread to stop A-Jetty.</p>
-   */
-  private class StopThread extends Thread {
-
-    @Override
-    public void run() {
-      if (BootStrapEmbeddedHttpsSwing.this
-        .bootStrapEmbeddedHttps.getIsStarted()) {
-        try {
-          BootStrapEmbeddedHttpsSwing.this.bootStrapEmbeddedHttps.stopServer();
-        } catch (Exception e) {
-          BootStrapEmbeddedHttpsSwing.this.logger
-            .error(null, BootStrapEmbeddedHttpsSwing.class, null, e);
-        }
-      }
-      BootStrapEmbeddedHttpsSwing.this.isActionPerforming = false;
-      BootStrapEmbeddedHttpsSwing.this.refreshUi();
     }
   };
 
   //Simple getters and setters:
-  /**
-   * <p>Getter for isActionPerforming.</p>
-   * @return boolean
-   **/
-  public final boolean getIsActionPerforming() {
-    return this.isActionPerforming;
-  }
-
-  /**
-   * <p>Getter for BootStrapEmbeddedHttps.</p>
-   * @return final
-   **/
-  public final BootStrapEmbeddedHttps getBootStrapEmbeddedHttps() {
-    return this.bootStrapEmbeddedHttps;
-  }
-
-  /**
-   * <p>Getter for factoryAppBeans.</p>
-   * @return IFactoryAppBeans
-   **/
-  public final IFactoryAppBeans getFactoryAppBeans() {
-    return this.factoryAppBeans;
-  }
-
   /**
    * <p>Getter for lbPort.</p>
    * @return JLabel
@@ -763,14 +415,6 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
   }
 
   /**
-   * <p>Getter for messages.</p>
-   * @return ResourceBundle
-   **/
-  public final ResourceBundle getMessages() {
-    return this.messages;
-  }
-
-  /**
    * <p>Getter for windowListener.</p>
    * @return WindowListener
    **/
@@ -779,58 +423,19 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
   }
 
   /**
-   * <p>Getter for lastActionStartDate.</p>
-   * @return long
+   * <p>Getter for mainBootStrap.</p>
+   * @return BootStrapEmbeddedMain
    **/
-  public final long getLastActionStartDate() {
-    return this.lastActionStartDate;
+  public final BootStrapEmbeddedMain getMainBootStrap() {
+    return this.mainBootStrap;
   }
 
   /**
-   * <p>Getter for ajettyIn.</p>
-   * @return Integer
+   * <p>Setter for mainBootStrap.</p>
+   * @param pMainBootStrap reference
    **/
-  public final Integer getAjettyIn() {
-    return this.ajettyIn;
-  }
-
-  /**
-   * <p>Setter for ajettyIn.</p>
-   * @param pAjettyIn reference
-   **/
-  public final void setAjettyIn(final Integer pAjettyIn) {
-    this.ajettyIn = pAjettyIn;
-  }
-
-  /**
-   * <p>Getter for cryptoService.</p>
-   * @return CryptoService
-   **/
-  public final CryptoService getCryptoService() {
-    return this.cryptoService;
-  }
-
-  /**
-   * <p>Setter for cryptoService.</p>
-   * @param pCryptoService reference
-   **/
-  public final void setCryptoService(final CryptoService pCryptoService) {
-    this.cryptoService = pCryptoService;
-  }
-
-  /**
-   * <p>Getter for logger.</p>
-   * @return ILogger
-   **/
-  public final ILogger getLogger() {
-    return this.logger;
-  }
-
-  /**
-   * <p>Setter for logger.</p>
-   * @param pLogger reference
-   **/
-  public final void setLogger(final ILogger pLogger) {
-    this.logger = pLogger;
+  public final void setMainBootStrap(
+    final BootStrapEmbeddedMain pMainBootStrap) {
+    this.mainBootStrap = pMainBootStrap;
   }
 }

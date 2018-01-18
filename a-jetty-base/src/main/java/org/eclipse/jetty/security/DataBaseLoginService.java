@@ -77,8 +77,10 @@ public class DataBaseLoginService extends MappedLoginService
       try
       {
         UserCredentials[] uca = this.srvGetUserCredentials.retrieveUsersCredentials();
-        for (UserCredentials uc : uca) {
-          putUser(uc.getUserName(), uc.getUserPassword(), uc.getUserRoles());
+        if (uca != null) {
+          for (UserCredentials uc : uca) {
+            putUser(uc.getUserName(), uc.getUserPassword(), uc.getUserRoles());
+          }
         }
       }
       catch (Exception e)
@@ -96,7 +98,9 @@ public class DataBaseLoginService extends MappedLoginService
       try
       {
         UserCredentials uc = this.srvGetUserCredentials.retrieveUserCredentials(username);
-        return putUser(uc.getUserName(), uc.getUserPassword(), uc.getUserRoles());
+        if (uc != null) {
+          return putUser(uc.getUserName(), uc.getUserPassword(), uc.getUserRoles());
+        }
       }
       catch (Exception e)
       {

@@ -360,7 +360,6 @@ public class BootStrapEmbeddedHttpsSwing extends JFrame
         }
         BootStrapEmbeddedHttpsSwing.this.setVisible(false);
         BootStrapEmbeddedHttpsSwing.this.dispose();
-        System.exit(0); // do not exit without it TODO some threads alive?
       }
     }
   };

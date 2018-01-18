@@ -387,7 +387,6 @@ public class BootStrapEmbeddedMain {
             } catch (Exception e) {
               if (bses != null) {
                 bses.dispose();
-                System.exit(0);
               }
             }
           }

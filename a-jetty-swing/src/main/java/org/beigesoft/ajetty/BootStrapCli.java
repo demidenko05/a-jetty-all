@@ -111,6 +111,7 @@ public class BootStrapCli implements IBootStrapIFace {
         if (this.isExit) {
           return;
         }
+        enterPort();
         enterStartOrQuit();
       } else {
         enterStopOrQuit();
@@ -187,6 +188,23 @@ public class BootStrapCli implements IBootStrapIFace {
           this.isExit = true;
         }
       }
+    }
+  }
+
+  /**
+   * <p>Enter port logic.</p>
+   **/
+  public final void enterPort() {
+    Console con = System.console();
+    try {
+      String port = con
+        .readLine(this.mainBootStrap.getMsg("enter_ajetty_port"));
+      if (port == null || port.length() == 0) {
+        return;
+      }
+      this.mainBootStrap.setPort(Integer.parseInt(port));
+    } catch (Exception e) {
+      con.printf(this.mainBootStrap.getMsg("ajetty_port_def") + "\n");
     }
   }
 

@@ -9,8 +9,8 @@ if ( [ "$REPLY" == "yes" ] ) then
   ssh-add ~/.ssh/$sshkeyfile
   ssh-add -l
   read -p "Enter GPG keyname: " gpgkeynm
-  read -p "Enter key alias sign JAR/APK: " keyalias
-  read -s -p "Enter pass-phrase to sign JAR/APK: " passw
+  read -p "Enter key alias to sign JAR/APK: " keyalias
+  read -p "Enter encrypted pass-phrase to sign JAR/APK: " passw
   mvn -Darguments="-Prelease -Dandroid.release=true -Dsignpass=$passw -Dsignalias=$keyalias -Dgpgkeyname=$gpgkeynm" release:clean release:prepare release:perform -B -e | tee maven-central-deploy.log
   ssh-add -D
 else

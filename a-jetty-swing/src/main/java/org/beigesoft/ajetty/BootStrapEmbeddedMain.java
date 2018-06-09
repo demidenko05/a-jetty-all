@@ -17,6 +17,7 @@ import java.io.FileInputStream;
 import java.io.OutputStreamWriter;
 import java.io.FileOutputStream;
 import java.util.Date;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import java.security.PublicKey;
 import java.security.KeyStore;
@@ -137,7 +138,6 @@ public class BootStrapEmbeddedMain {
       File jarBoot = new File(BootStrapEmbeddedMain.class
         .getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
       appDir = jarBoot.getParent();
-      this.messages = ResourceBundle.getBundle("MessagesAjetty");
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -149,6 +149,19 @@ public class BootStrapEmbeddedMain {
       log.setFilePath(appDir + File.separator + "starter");
       log.setIsCloseFileAfterRecord(true);
       this.logger = log;
+    }
+    try {
+      this.messages = ResourceBundle.getBundle("MessagesAjetty");
+    } catch (Exception e) {
+      this.logger.error(null, BootStrapEmbeddedMain.class,
+        "Can't load messages for default locale", e);
+      try {
+        Locale locale = new Locale("en", "US");
+        this.messages = ResourceBundle.getBundle("MessagesAjetty", locale);
+      } catch (Exception e1) {
+        this.logger.error(null, BootStrapEmbeddedMain.class,
+          "Can't load messages for en-US", e1);
+      }
     }
     try {
       java.util.List<String> arguments = java.lang.management.ManagementFactory

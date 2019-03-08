@@ -18,14 +18,14 @@
 
 package org.eclipse.jetty.util.log;
 
-import org.beigesoft.log.ILogger;
+import org.beigesoft.log.ILog;
 
 /**
  * <p>ILogger Logger only for all classes.</p>
  */
 public abstract class AILoggerLog implements Logger {
 
-  private ILogger logger;
+  private ILog logger;
   
   public AILoggerLog() {
     createLogger();
@@ -83,28 +83,28 @@ public abstract class AILoggerLog implements Logger {
 
   @Override
   public final void debug(final String msg, final Object... args) {
-    if (this.logger.getIsShowDebugMessages()) {
+    if (this.logger.getDbgSh()) {
       this.logger.debug(null, this.getClass(), msg);
     }
   }
 
   @Override
   public final void debug(final String msg, final long arg) {
-    if (this.logger.getIsShowDebugMessages()) {
+    if (this.logger.getDbgSh()) {
       this.logger.debug(null, this.getClass(), msg + new Object[]{new Long(arg)});
     }
   }
 
   @Override
   public final void debug(final Throwable thrown) {
-    if (this.logger.getIsShowDebugMessages()) {
+    if (this.logger.getDbgSh()) {
       this.logger.debug(null, this.getClass(), null, thrown);
     }
   }
 
   @Override
   public final void debug(final String msg, final Throwable thrown) {
-    if (this.logger.getIsShowDebugMessages()) {
+    if (this.logger.getDbgSh()) {
       this.logger.debug(null, this.getClass(), msg, thrown);
     }
   }
@@ -116,12 +116,12 @@ public abstract class AILoggerLog implements Logger {
 
   @Override
   public final boolean isDebugEnabled() {
-    return this.logger.getIsShowDebugMessages();
+    return this.logger.getDbgSh();
   }
 
   @Override
   public final void setDebugEnabled(final boolean enabled) {
-    this.logger.setIsShowDebugMessages(enabled);
+    this.logger.setDbgSh(enabled);
   }
 
   //Simple getters and setters:
@@ -129,7 +129,7 @@ public abstract class AILoggerLog implements Logger {
    * <p>Getter for logger.</p>
    * @return ILogger
    **/
-  public final ILogger getLogger() {
+  public final ILog getLogger() {
     return this.logger;
   }
 
@@ -137,7 +137,7 @@ public abstract class AILoggerLog implements Logger {
    * <p>Setter for logger.</p>
    * @param pLogger reference
    **/
-  public final void setLogger(final ILogger pLogger) {
+  public final void setLogger(final ILog pLogger) {
     this.logger = pLogger;
   }
 }

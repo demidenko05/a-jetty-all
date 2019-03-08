@@ -30,8 +30,8 @@ import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 
 import org.beigesoft.afactory.IFactoryAppBeans;
 import org.beigesoft.ajetty.crypto.CryptoService;
-import org.beigesoft.log.ILogger;
-import org.beigesoft.log.LoggerFile;
+import org.beigesoft.log.ILog;
+import org.beigesoft.log.LogFile;
 
 /**
  * <p>
@@ -96,7 +96,7 @@ public class BootStrapEmbeddedMain {
   /**
    * <p>Logger.</p>
    **/
-  private ILogger logger;
+  private ILog logger;
 
   /**
    * <p>Is debug.</p>
@@ -145,9 +145,9 @@ public class BootStrapEmbeddedMain {
       appDir = System.getProperty("user.dir");
     }
     if (this.logger == null) {
-      LoggerFile log = new LoggerFile();
-      log.setFilePath(appDir + File.separator + "starter");
-      log.setIsCloseFileAfterRecord(true);
+      LogFile log = new LogFile();
+      log.setPath(appDir + File.separator + "starter");
+      log.setClsImm(true);
       this.logger = log;
     }
     try {
@@ -578,9 +578,9 @@ public class BootStrapEmbeddedMain {
 
   /**
    * <p>Getter for logger.</p>
-   * @return ILogger
+   * @return ILog
    **/
-  public final ILogger getLogger() {
+  public final ILog getLogger() {
     return this.logger;
   }
 
@@ -588,7 +588,7 @@ public class BootStrapEmbeddedMain {
    * <p>Setter for logger.</p>
    * @param pLogger reference
    **/
-  public final void setLogger(final ILogger pLogger) {
+  public final void setLogger(final ILog pLogger) {
     this.logger = pLogger;
   }
 

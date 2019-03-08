@@ -40,8 +40,8 @@ import javax.crypto.CipherOutputStream;
 
 import org.beigesoft.ajetty.crypto.ICryptoService;
 import org.beigesoft.ajetty.crypto.CryptoService;
-import org.beigesoft.log.ILogger;
-import org.beigesoft.log.LoggerSimple;
+import org.beigesoft.log.ILog;
+import org.beigesoft.log.LogSmp;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -64,7 +64,7 @@ public class CryptoTest {
 
   private ICryptoService cryptoService;
   
-  private ILogger log;
+  private ILog log;
 
   private String ksPath;
 
@@ -86,7 +86,7 @@ public class CryptoTest {
         this.cryptoService.createKeyStoreWithCredentials(this.ksPath, 1, this.ksPassword);
       }
       if (this.log == null) {
-        this.log = new LoggerSimple();
+        this.log = new LogSmp();
       }
       isInit = true;
     }
@@ -471,9 +471,9 @@ public class CryptoTest {
 
   /**
    * <p>Getter for log.</p>
-   * @return ILogger
+   * @return ILog
    **/
-  public final ILogger getLog() {
+  public final ILog getLog() {
     return this.log;
   }
 
@@ -481,7 +481,7 @@ public class CryptoTest {
    * <p>Setter for log.</p>
    * @param pLog reference
    **/
-  public final void setLog(final ILogger pLog) {
+  public final void setLog(final ILog pLog) {
     this.log = pLog;
   }
 

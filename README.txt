@@ -1,6 +1,10 @@
 site: https://sites.google.com/site/beigesoftware
 
-A-Jetty is multiplatform Jetty 9.2 adapted for Android, it can run precompiled JSP/JSTL.
+A-Jetty is multiplatform Jetty 9.2 adapted for Android, it can execute precompiled JSP/JSTL.
+
+Version 1.0.5:
+*changed to new beige-log
+*changed to Bouncy Castle 1.61
 
 Licenses:
 

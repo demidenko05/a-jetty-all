@@ -20,7 +20,7 @@ package org.eclipse.jetty.util.log;
 
 import java.io.File;
 
-import org.beigesoft.log.LoggerFileAdp;
+import org.beigesoft.log.LogFileAdp;
 
 import android.os.Environment;
 import android.util.Log;
@@ -41,10 +41,10 @@ public class LoggerFileAndroid extends AILoggerLog {
    **/
   @Override
   protected final void createLogger() {
-    LoggerFileAdp logger = new LoggerFileAdp();
+    LogFileAdp logger = new LogFileAdp();
     String currDir = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator;
-    logger.setFilePath(currDir + "ajetty");
-    Log.i("A-Jetty", "> Log file path: " + logger.getFilePath());
+    logger.setPath(currDir + "ajetty");
+    Log.i("A-Jetty", "> Log file path: " + logger.getPath());
     setLogger(logger);
   }
 }

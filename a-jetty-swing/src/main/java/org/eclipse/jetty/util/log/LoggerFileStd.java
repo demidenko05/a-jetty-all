@@ -20,10 +20,10 @@ package org.eclipse.jetty.util.log;
 
 import java.io.File;
 
-import org.beigesoft.log.LoggerFile;
-import org.beigesoft.log.FillerFileLogProperties;
-import org.beigesoft.log.IDebugPrinter;
-import org.beigesoft.log.DebugPrinterConsole;
+import org.beigesoft.log.LogFile;
+import org.beigesoft.log.FilFlLogPrp;
+import org.beigesoft.log.IPrnDbg;
+import org.beigesoft.log.PrnDbgCon;
 
 /**
  * Logger into file only for all classes.
@@ -36,65 +36,62 @@ import org.beigesoft.log.DebugPrinterConsole;
  */
 public class LoggerFileStd extends AILoggerLog {
 
-  private FillerFileLogProperties fillerFileLogProperties;
+  private FilFlLogPrp filFlLogPrp;
 
   /**
    * <p>Debug printer.</p>
    **/
-  private IDebugPrinter debugPrinter;
+  private IPrnDbg prnDbg;
 
   /**
    * <p>Create logger for all classes.</p>
    **/
   @Override
   protected final void createLogger() {
-    LoggerFile log = new LoggerFile();
-    log.setIsCloseFileAfterRecord(true);
-    if (this.fillerFileLogProperties == null) {
-      this.fillerFileLogProperties = new FillerFileLogProperties();
+    LogFile log = new LogFile();
+    log.setClsImm(true);
+    if (this.filFlLogPrp == null) {
+      this.filFlLogPrp = new FilFlLogPrp();
     }
-    if (this.debugPrinter == null) {
-      this.debugPrinter = new DebugPrinterConsole();
+    if (this.prnDbg == null) {
+      this.prnDbg = new PrnDbgCon();
     }
-    this.fillerFileLogProperties.setDebugPrinter(this.debugPrinter);
-    this.fillerFileLogProperties.fillProperties(log, "ajetty");
+    this.filFlLogPrp.setPrnDbg(this.prnDbg);
+    this.filFlLogPrp.fill(log, "ajetty");
     setLogger(log);
   }
 
 
   //Simple getters and setters:
   /**
-   * <p>Getter for fillerFileLogProperties.</p>
-   * @return FillerFileLogProperties
+   * <p>Getter for filFlLogPrp.</p>
+   * @return FilFlLogPrp
    **/
-  public final FillerFileLogProperties
-    getFillerFileLogProperties() {
-    return this.fillerFileLogProperties;
+  public final FilFlLogPrp getFilFlLogPrp() {
+    return this.filFlLogPrp;
   }
 
   /**
-   * <p>Setter for fillerFileLogProperties.</p>
-   * @param pFillerFileLogProperties reference
+   * <p>Setter for filFlLogPrp.</p>
+   * @param pFilFlLogPrp reference
    **/
-  public final void setFillerFileLogProperties(
-    final FillerFileLogProperties pFillerFileLogProperties) {
-    this.fillerFileLogProperties = pFillerFileLogProperties;
+  public final void setFilFlLogPrp(final FilFlLogPrp pFilFlLogPrp) {
+    this.filFlLogPrp = pFilFlLogPrp;
   }
 
   /**
-   * <p>Getter for debugPrinter.</p>
-   * @return IDebugPrinter
+   * <p>Getter for prnDbg.</p>
+   * @return IPrnDbg
    **/
-  public final IDebugPrinter getDebugPrinter() {
-    return this.debugPrinter;
+  public final IPrnDbg getPrnDbg() {
+    return this.prnDbg;
   }
 
   /**
-   * <p>Setter for debugPrinter.</p>
-   * @param pDebugPrinter reference
+   * <p>Setter for prnDbg.</p>
+   * @param pPrnDbg reference
    **/
-  public final void setDebugPrinter(
-    final IDebugPrinter pDebugPrinter) {
-    this.debugPrinter = pDebugPrinter;
+  public final void setPrnDbg(final IPrnDbg pPrnDbg) {
+    this.prnDbg = pPrnDbg;
   }
 }

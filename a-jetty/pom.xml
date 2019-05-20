@@ -12,7 +12,9 @@
   
   <name>A-Jetty for Android.</name>
   <description>A-Jetty for Android. It is Jetty 9.2 adapted for Android
-   configured as minimum server with WebAppDeployer that can deploy ordinal WAR (JSP/JSTL must be precompeled into servlets by A-Tomcat)</description>
+   configured as minimum server with WebAppDeployer that can deploy ordinal WAR (JSP/JSTL must be pre-compiled into servlets by A-Tomcat).
+   It's only for tests purposes. It doesn't comply to the latest Android policy (loading executable binaries from outside)!
+  </description>
   <url>https://sites.google.com/site/beigesoftware</url>
 
   <inceptionYear>2016</inceptionYear>
@@ -36,8 +38,8 @@
       <distribution>repo</distribution>
     </license>
     <license>
-      <name>GNU General Public License version 2</name>
-      <url>http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html</url>
+      <name>BSD 2-Clause License</name>
+      <url>https://sites.google.com/site/beigesoftware/bsd2csl</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
@@ -155,6 +157,16 @@
       <groupId>com.github.demidenko05</groupId>
       <artifactId>a-jetty-base</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcprov-jdk15on</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcpkix-jdk15on</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 

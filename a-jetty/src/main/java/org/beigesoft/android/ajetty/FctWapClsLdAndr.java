@@ -28,29 +28,44 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.beigesoft.android.ajetty;
 
-import java.util.HashMap;
-import java.util.Map;
-import android.app.Application;
+import android.content.Context;
+
+import org.eclipse.jetty.webapp.WebAppClassLoader;
+
+import org.beigesoft.afactory.IFactoryParam;
 
 /**
- * <p>It extends Application to contains application beans map.</p>
+ * <p>Factory of WapClsLdAndr.</p>
  *
  * @author Yury Demidenko
  */
-public class ApplicationPlus extends Application {
+public class FctWapClsLdAndr implements
+  IFactoryParam<WapClsLdAndr, WebAppClassLoader.Context> {
 
   /**
-   * <p>Application beans map.</p>
+   * <p>Android context.</p>
    **/
-  private final Map<String, Object> beansMap = new HashMap<String, Object>();
+  private final Context context;
 
   /**
-   * Shared services
-   * (do not hold medium and big data in it!!!
-   * Use a data storage(SQL, a file...) to hold that data!)
-   * @return a service
+   * <p>Setter for context.</p>
+   * @param pContext reference
+   **/
+  public FctWapClsLdAndr(final Context pContext) {
+    this.context = pContext;
+  }
+
+  /**
+   * <p>Create a bean with abstract params.</p>
+   * @param pParam parameter
+   * @return M request(or) scoped bean
    */
-  public final Map<String, Object> getBeansMap() {
-    return this.beansMap;
+  @Override
+  public final WapClsLdAndr create(
+    final WebAppClassLoader.Context pContext) throws Exception {
+    WapClsLdAndr result = new WapClsLdAndr(pContext);
+    result.setOptimizedDirectory(this.context.getFilesDir().getAbsolutePath());
+    result.init();
+    return result;
   }
 }

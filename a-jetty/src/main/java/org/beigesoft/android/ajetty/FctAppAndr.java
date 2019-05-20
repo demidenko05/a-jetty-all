@@ -28,29 +28,62 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.beigesoft.android.ajetty;
 
-import java.util.HashMap;
-import java.util.Map;
-import android.app.Application;
+import android.content.Context;
+
+import org.beigesoft.afactory.IFactoryAppBeans;
 
 /**
- * <p>It extends Application to contains application beans map.</p>
+ * <p>Factory app-beans for standart Java.</p>
  *
  * @author Yury Demidenko
  */
-public class ApplicationPlus extends Application {
+public class FctAppAndr implements IFactoryAppBeans {
 
   /**
-   * <p>Application beans map.</p>
+   * <p>Factory of WapClsLdAndr.</p>
    **/
-  private final Map<String, Object> beansMap = new HashMap<String, Object>();
+  private FctWapClsLdAndr factoryWebAppClassLoaderAndroid;
 
   /**
-   * Shared services
-   * (do not hold medium and big data in it!!!
-   * Use a data storage(SQL, a file...) to hold that data!)
-   * @return a service
+   * <p>Android context.</p>
+   **/
+  private final Context context;
+
+  /**
+   * <p>Setter for context.</p>
+   * @param pContext reference
+   **/
+  public FctAppAndr(final Context pContext) {
+    this.context = pContext;
+  }
+
+
+  /**
+   * <p>Get bean in lazy mode (if bean is null then initialize it).</p>
+   * @param pBeanName - bean name
+   * @return Object - requested bean
+   * @throws Exception - an exception
    */
-  public final Map<String, Object> getBeansMap() {
-    return this.beansMap;
+  @Override
+  public final synchronized Object lazyGet(
+    final String pBeanName) throws Exception {
+    if ("IFactoryParam<IUrlClassLoader, WebAppClassLoader.Context>"
+      .equals(pBeanName)) {
+      return lazyGetFactoryWebAppClassLoaderAndroid();
+    }
+    throw new Exception("There is no bean: " + pBeanName);
+  }
+
+  /**
+   * <p>Getter for factoryWebAppClassLoaderAndroid.</p>
+   * @return FctWapClsLdAndr
+   **/
+  public final FctWapClsLdAndr
+    lazyGetFactoryWebAppClassLoaderAndroid() {
+    if (this.factoryWebAppClassLoaderAndroid == null) {
+      this.factoryWebAppClassLoaderAndroid =
+        new FctWapClsLdAndr(this.context);
+    }
+    return this.factoryWebAppClassLoaderAndroid;
   }
 }

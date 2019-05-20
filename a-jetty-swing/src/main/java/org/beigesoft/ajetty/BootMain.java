@@ -1,16 +1,32 @@
-package org.beigesoft.ajetty;
-
 /*
- * Copyright (c) 2018 Beigesoft ™
- *
- * Licensed under the GNU General Public License (GPL), Version 2.0
- * (the "License");
- * you may not use this file except in compliance with the License.
- *
- * You may obtain a copy of the License at
- *
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
+BSD 2-Clause License
+
+Copyright (c) 2019, Beigesoft™
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+package org.beigesoft.ajetty;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,18 +51,18 @@ import org.beigesoft.log.LogFile;
 
 /**
  * <p>
- * BootStrapEmbeddedHttpsIFacelaunches A-Jetty as host 127.0.0.1 on opted port
+ * BootMain launches A-Jetty as host 127.0.0.1 on opted port
  * and uses HTTPS connector,
  * for only WEB-application in <b>webapp</b> folder
  * For internationalization it expects overridden MessagesAjetty.properties
  * file. There are two interfaces - SWING and command line (CLI).
  * Add "cli" argument to start CLI,
- * i.e. "java -jar BootStrapEmbeddedMain.jar cli"
+ * i.e. "java -jar BootMain.jar cli"
  * </p>
  *
  * @author Yury Demidenko
  */
-public class BootStrapEmbeddedMain {
+public class BootMain {
 
   /**
    * <p>Factory app-beans - only for WEB-app class loader.</p>
@@ -56,7 +72,7 @@ public class BootStrapEmbeddedMain {
   /**
    * <p>Bootstrap.</p>
    **/
-  private final BootStrapEmbeddedHttps bootStrapEmbeddedHttps;
+  private final BootEmbed bootEmbed;
 
   /**
    * <p>I18N.</p>
@@ -121,7 +137,7 @@ public class BootStrapEmbeddedMain {
   /**
    * <p>Swing interface.</p>
    **/
-  private IBootStrapIFace bootStrapIFace;
+  private IBootFace bootStrapIFace;
 
   /**
    * <p>Is last start fail.</p>
@@ -132,10 +148,10 @@ public class BootStrapEmbeddedMain {
    * <p>Only constructor.</p>
    * @throws ExceptionStart ExceptionStart
    **/
-  public BootStrapEmbeddedMain() throws ExceptionStart {
+  public BootMain() throws ExceptionStart {
     String appDir = null;
     try {
-      File jarBoot = new File(BootStrapEmbeddedMain.class
+      File jarBoot = new File(BootMain.class
         .getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
       appDir = jarBoot.getParent();
     } catch (Exception e) {
@@ -153,13 +169,13 @@ public class BootStrapEmbeddedMain {
     try {
       this.messages = ResourceBundle.getBundle("MessagesAjetty");
     } catch (Exception e) {
-      this.logger.error(null, BootStrapEmbeddedMain.class,
+      this.logger.error(null, BootMain.class,
         "Can't load messages for default locale", e);
       try {
         Locale locale = new Locale("en", "US");
         this.messages = ResourceBundle.getBundle("MessagesAjetty", locale);
       } catch (Exception e1) {
-        this.logger.error(null, BootStrapEmbeddedMain.class,
+        this.logger.error(null, BootMain.class,
           "Can't load messages for en-US", e1);
       }
     }
@@ -172,7 +188,7 @@ public class BootStrapEmbeddedMain {
         }
       }
     } catch (Exception e) {
-      this.logger.warn(null, BootStrapEmbeddedMain.class,
+      this.logger.warn(null, BootMain.class,
         "IS DEBUG CHECKING: ", e);
     }
     try {
@@ -180,7 +196,7 @@ public class BootStrapEmbeddedMain {
         setCryptoService(new CryptoService());
       }
       // A-Jetty:
-      this.factoryAppBeans = new FactoryAppBeansEmbedded();
+      this.factoryAppBeans = new FctAppEmb();
       String webAppPath = appDir + File.separator + "webapp";
       File webappdir = new File(webAppPath);
       if (!webappdir.exists() || !webappdir.isDirectory()) {
@@ -205,15 +221,15 @@ public class BootStrapEmbeddedMain {
           this.isKeystoreCreated = true;
         }
       }
-      this.bootStrapEmbeddedHttps = new BootStrapEmbeddedHttps();
-      this.bootStrapEmbeddedHttps.setFactoryAppBeans(this.factoryAppBeans);
-      this.bootStrapEmbeddedHttps.setWebAppPath(webAppPath);
+      this.bootEmbed = new BootEmbed();
+      this.bootEmbed.setFactoryAppBeans(this.factoryAppBeans);
+      this.bootEmbed.setWebAppPath(webAppPath);
       Security.addProvider(new BouncyCastleProvider());
     } catch (ExceptionStart e) {
-      this.logger.error(null, BootStrapEmbeddedMain.class, null, e);
+      this.logger.error(null, BootMain.class, null, e);
       throw e;
     } catch (Exception e) {
-      this.logger.error(null, BootStrapEmbeddedMain.class, null, e);
+      this.logger.error(null, BootMain.class, null, e);
       throw new ExceptionStart(e);
     }
   }
@@ -227,7 +243,7 @@ public class BootStrapEmbeddedMain {
       StopThread stThread = new StopThread();
       stThread.start();
     } catch (Exception e) {
-      this.logger.error(null, BootStrapEmbeddedMain.class, null, e);
+      this.logger.error(null, BootMain.class, null, e);
       throw new ExceptionStart(e);
     }
   }
@@ -237,7 +253,7 @@ public class BootStrapEmbeddedMain {
    * @throws Exception an Exception
    **/
   public final void startAjetty() throws Exception {
-    File webappdir = new File(this.bootStrapEmbeddedHttps
+    File webappdir = new File(this.bootEmbed
       .getWebAppPath());
     String ksPath = webappdir.getParent() + File.separator + "ks";
     File pks12File = new File(ksPath + File.separator
@@ -285,7 +301,7 @@ public class BootStrapEmbeddedMain {
             fis.close();
           } catch (Exception e2) {
             this.logger
-              .error(null, BootStrapEmbeddedMain.class, null, e2);
+              .error(null, BootMain.class, null, e2);
           }
         }
       }
@@ -306,7 +322,7 @@ public class BootStrapEmbeddedMain {
               pemWriter.close();
             } catch (Exception e2) {
               this.logger
-                .error(null, BootStrapEmbeddedMain.class, null, e2);
+                .error(null, BootMain.class, null, e2);
             }
           }
         }
@@ -325,7 +341,7 @@ public class BootStrapEmbeddedMain {
               fos.close();
             } catch (Exception e2) {
               this.logger
-                .error(null, BootStrapEmbeddedMain.class, null, e2);
+                .error(null, BootMain.class, null, e2);
             }
           }
         }
@@ -338,14 +354,14 @@ public class BootStrapEmbeddedMain {
         this.keyStore.load(fis, this.ksPassword);
       } catch (Exception e) {
         this.keyStore = null;
-        this.logger.error(null, BootStrapEmbeddedMain.class, null, e);
+        this.logger.error(null, BootMain.class, null, e);
       } finally {
         if (fis != null) {
           try {
             fis.close();
           } catch (Exception e2) {
             this.logger
-              .error(null, BootStrapEmbeddedMain.class, null, e2);
+              .error(null, BootMain.class, null, e2);
           }
         }
       }
@@ -356,12 +372,12 @@ public class BootStrapEmbeddedMain {
         return;
       }
     }
-    this.bootStrapEmbeddedHttps.setHttpsAlias("AJettyHttps" + this.ajettyIn);
-    this.bootStrapEmbeddedHttps.setPkcs12File(pks12File);
-    this.bootStrapEmbeddedHttps.setPassword(new String(this.ksPassword));
-    this.bootStrapEmbeddedHttps.setKeyStore(this.keyStore);
-    this.bootStrapEmbeddedHttps.setAjettyIn(this.ajettyIn);
-    this.bootStrapEmbeddedHttps.setPort(this.port);
+    this.bootEmbed.setHttpsAlias("AJettyHttps" + this.ajettyIn);
+    this.bootEmbed.setPkcs12File(pks12File);
+    this.bootEmbed.setPassword(new String(this.ksPassword));
+    this.bootEmbed.setKeyStore(this.keyStore);
+    this.bootEmbed.setAjettyIn(this.ajettyIn);
+    this.bootEmbed.setPort(this.port);
     this.lastActionStartDate = new Date().getTime();
     StartThread stThread = new StartThread();
     stThread.start();
@@ -381,7 +397,7 @@ public class BootStrapEmbeddedMain {
    **/
   public static final void main(final String[] pArgs) {
     try {
-      final BootStrapEmbeddedMain bsem = new BootStrapEmbeddedMain();
+      final BootMain bsem = new BootMain();
       if (pArgs != null && pArgs.length > 0 && "cli".equals(pArgs[0])) {
         //command line interface:
         BootStrapCli bsc = new BootStrapCli();
@@ -391,9 +407,9 @@ public class BootStrapEmbeddedMain {
       } else {
         java.awt.EventQueue.invokeLater(new Runnable() {
           public void run() {
-            BootStrapEmbeddedHttpsSwing bses = null;
+            BootSwing bses = null;
             try {
-              bses = new BootStrapEmbeddedHttpsSwing();
+              bses = new BootSwing();
               bses.setMainBootStrap(bsem);
               bsem.setBootStrapIFace(bses);
               bses.startInterface();
@@ -433,13 +449,13 @@ public class BootStrapEmbeddedMain {
 
     @Override
     public void run() {
-      if (!BootStrapEmbeddedMain
-        .this.bootStrapEmbeddedHttps.getIsStarted()) {
+      if (!BootMain
+        .this.bootEmbed.getIsStarted()) {
         try {
-          BootStrapEmbeddedMain.this.bootStrapEmbeddedHttps.startServer();
+          BootMain.this.bootEmbed.startServer();
         } catch (Exception e) {
-          BootStrapEmbeddedMain.this.logger
-            .error(null, BootStrapEmbeddedMain.class, null, e);
+          BootMain.this.logger
+            .error(null, BootMain.class, null, e);
         }
       }
     }
@@ -452,17 +468,17 @@ public class BootStrapEmbeddedMain {
 
     @Override
     public void run() {
-      if (!BootStrapEmbeddedMain
-        .this.bootStrapEmbeddedHttps.getIsStarted()) {
+      if (!BootMain
+        .this.bootEmbed.getIsStarted()) {
         try {
-          BootStrapEmbeddedMain.this.bootStrapEmbeddedHttps.startServer();
+          BootMain.this.bootEmbed.startServer();
         } catch (Exception e) {
-          BootStrapEmbeddedMain.this.logger
-            .error(null, BootStrapEmbeddedMain.class, null, e);
+          BootMain.this.logger
+            .error(null, BootMain.class, null, e);
         }
       }
-      BootStrapEmbeddedMain.this.isActionPerforming = false;
-      BootStrapEmbeddedMain.this.refreshUi();
+      BootMain.this.isActionPerforming = false;
+      BootMain.this.refreshUi();
     }
   };
 
@@ -473,17 +489,17 @@ public class BootStrapEmbeddedMain {
 
     @Override
     public void run() {
-      if (BootStrapEmbeddedMain.this
-        .bootStrapEmbeddedHttps.getIsStarted()) {
+      if (BootMain.this
+        .bootEmbed.getIsStarted()) {
         try {
-          BootStrapEmbeddedMain.this.bootStrapEmbeddedHttps.stopServer();
+          BootMain.this.bootEmbed.stopServer();
         } catch (Exception e) {
-          BootStrapEmbeddedMain.this.logger
-            .error(null, BootStrapEmbeddedMain.class, null, e);
+          BootMain.this.logger
+            .error(null, BootMain.class, null, e);
         }
       }
-      BootStrapEmbeddedMain.this.isActionPerforming = false;
-      BootStrapEmbeddedMain.this.refreshUi();
+      BootMain.this.isActionPerforming = false;
+      BootMain.this.refreshUi();
     }
   };
 
@@ -521,11 +537,11 @@ public class BootStrapEmbeddedMain {
   }
 
   /**
-   * <p>Getter for BootStrapEmbeddedHttps.</p>
+   * <p>Getter for BootEmbed.</p>
    * @return final
    **/
-  public final BootStrapEmbeddedHttps getBootStrapEmbeddedHttps() {
-    return this.bootStrapEmbeddedHttps;
+  public final BootEmbed getBootEmbed() {
+    return this.bootEmbed;
   }
 
   /**
@@ -659,9 +675,9 @@ public class BootStrapEmbeddedMain {
 
   /**
    * <p>Getter for bootStrapIFace.</p>
-   * @return IBootStrapIFace
+   * @return IBootFace
    **/
-  public final IBootStrapIFace getBootStrapIFace() {
+  public final IBootFace getBootStrapIFace() {
     return this.bootStrapIFace;
   }
 
@@ -669,7 +685,7 @@ public class BootStrapEmbeddedMain {
    * <p>Setter for bootStrapIFace.</p>
    * @param pBootStrapIFace reference
    **/
-  public final void setBootStrapIFace(final IBootStrapIFace pBootStrapIFace) {
+  public final void setBootStrapIFace(final IBootFace pBootStrapIFace) {
     this.bootStrapIFace = pBootStrapIFace;
   }
 

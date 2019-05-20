@@ -28,45 +28,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.beigesoft.ajetty;
 
-import org.beigesoft.afactory.IFactoryAppBeans;
-
 /**
- * <p>Factory app-beans for standart Java.</p>
+ * <p>Abstraction of Bootstrap interface.</p>
  *
  * @author Yury Demidenko
  */
-public class FactoryAppBeansStd implements IFactoryAppBeans {
+public interface IBootFace {
 
   /**
-   * <p>Factory WebAppClassLoaderStd.</p>
+   * <p>Refresh user interface.</p>
    **/
-  private FactoryWebAppClassLoaderStd factoryWebAppClassLoaderStd;
+  void refreshUi();
 
   /**
-   * <p>Get bean in lazy mode (if bean is null then initialize it).</p>
-   * @param pBeanName - bean name
-   * @return Object - requested bean
-   * @throws Exception - an exception
-   */
-  @Override
-  public final synchronized Object lazyGet(
-    final String pBeanName) throws Exception {
-    if ("IFactoryParam<IUrlClassLoader, WebAppClassLoader.Context>"
-      .equals(pBeanName)) {
-      return lazyGetFactoryWebAppClassLoaderStd();
-    }
-    throw new Exception("There is no bean: " + pBeanName);
-  }
-
-  /**
-   * <p>Getter for factoryWebAppClassLoaderStd.</p>
-   * @return FactoryWebAppClassLoaderStd
+   * <p>Show error message.</p>
+   * @param pError message
    **/
-  public final FactoryWebAppClassLoaderStd
-    lazyGetFactoryWebAppClassLoaderStd() {
-    if (this.factoryWebAppClassLoaderStd == null) {
-      this.factoryWebAppClassLoaderStd = new FactoryWebAppClassLoaderStd();
-    }
-    return this.factoryWebAppClassLoaderStd;
-  }
+  void showError(String pError);
 }

@@ -181,7 +181,7 @@ public class BootStrap {
           bootStrap.setJettyBase(arg.replace("jetty:base=", "").trim());
         }
       }
-      bootStrap.setFactoryAppBeans(new FactoryAppBeansStd());
+      bootStrap.setFactoryAppBeans(new FctApp());
       bootStrap.createServer();
       bootStrap.startServer();
       // The use of server.join() the will make the current thread join and

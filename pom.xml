@@ -193,8 +193,8 @@
                 <!--Rule:AvoidUsingHardCodedIP is wrong-->
                 <exclude>org/beigesoft/ajetty/crypto/CryptoService.java</exclude>
                 <exclude>org/beigesoft/ajetty/BootStrap.java</exclude>
-                <exclude>org/beigesoft/ajetty/BootStrapEmbeddedHttps.java</exclude>
-                <exclude>org/beigesoft/ajetty/BootStrapEmbeddedHttpsSwing.java</exclude>
+                <exclude>org/beigesoft/ajetty/BootEmbed.java</exclude>
+                <exclude>org/beigesoft/ajetty/BootSwing.java</exclude>
               </excludes>
             </configuration>
             <executions>
@@ -356,8 +356,8 @@
       <distribution>repo</distribution>
     </license>
     <license>
-      <name>GNU General Public License version 2</name>
-      <url>http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html</url>
+      <name>BSD 2-Clause License</name>
+      <url>https://sites.google.com/site/beigesoftware/bsd2csl</url>
       <distribution>repo</distribution>
     </license>
   </licenses>

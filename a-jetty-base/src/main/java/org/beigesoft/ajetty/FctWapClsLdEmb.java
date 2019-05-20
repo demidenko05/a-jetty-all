@@ -38,7 +38,7 @@ import org.beigesoft.afactory.IFactoryParam;
  *
  * @author Yury Demidenko
  */
-public class FactoryWebAppClassLoaderEmbedded implements
+public class FctWapClsLdEmb implements
   IFactoryParam<WebAppClassLoaderEmbedded, WebAppClassLoader.Context> {
 
   /**

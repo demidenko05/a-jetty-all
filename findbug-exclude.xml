@@ -13,21 +13,21 @@
     <Class name="~.*R\$.*"/>
   </Match>
   <Match>
-    <Class name="org.beigesoft.ajetty.FactoryWebAppClassLoaderStd"/>
+    <Class name="org.beigesoft.ajetty.FctWapClsLd"/>
     <Method name="create"/>
     <Bug pattern="DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED"/>
   </Match>
   <Match>
-     <Class name="org.beigesoft.ajetty.BootStrapEmbeddedHttpsSwing" />
+     <Class name="org.beigesoft.ajetty.BootSwing" />
      <Bug pattern="SE_BAD_FIELD_STORE" />
   </Match>
   <Match>
-    <Class name="org.beigesoft.ajetty.FactoryWebAppClassLoaderEmbedded"/>
+    <Class name="org.beigesoft.ajetty.FctWapClsLdEmb"/>
     <Method name="create"/>
     <Bug pattern="DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED"/>
   </Match>
   <Match>
-    <Class name="org.beigesoft.android.ajetty.WebAppClassLoaderAndroid"/>
+    <Class name="org.beigesoft.android.ajetty.WapClsLdAndr"/>
     <Method name="init"/>
     <Bug pattern="DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED"/>
   </Match>
@@ -55,11 +55,11 @@
      <Bug pattern="EI_EXPOSE_REP2" />
   </Match>
   <Match>
-     <Class name="org.beigesoft.ajetty.BootStrapEmbeddedMain" />
+     <Class name="org.beigesoft.ajetty.BootMain" />
      <Bug pattern="EI_EXPOSE_REP" />
   </Match>
   <Match>
-     <Class name="org.beigesoft.ajetty.BootStrapEmbeddedMain" />
+     <Class name="org.beigesoft.ajetty.BootMain" />
      <Bug pattern="EI_EXPOSE_REP2" />
   </Match>
 </FindBugsFilter>

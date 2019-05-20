@@ -35,12 +35,12 @@ import org.beigesoft.afactory.IFactoryAppBeans;
  *
  * @author Yury Demidenko
  */
-public class FactoryAppBeansEmbedded implements IFactoryAppBeans {
+public class FctAppEmb implements IFactoryAppBeans {
 
   /**
    * <p>Factory WebAppClassLoaderEmbedded.</p>
    **/
-  private FactoryWebAppClassLoaderEmbedded factoryWebAppClassLoaderEmbedded;
+  private FctWapClsLdEmb factoryWebAppClassLoaderEmbedded;
 
   /**
    * <p>Get bean in lazy mode (if bean is null then initialize it).</p>
@@ -60,13 +60,13 @@ public class FactoryAppBeansEmbedded implements IFactoryAppBeans {
 
   /**
    * <p>Getter for factoryWebAppClassLoaderEmbedded.</p>
-   * @return FactoryWebAppClassLoaderEmbedded
+   * @return FctWapClsLdEmb
    **/
-  public final FactoryWebAppClassLoaderEmbedded
+  public final FctWapClsLdEmb
     lazyGetFactoryWebAppClassLoaderEmbedded() {
     if (this.factoryWebAppClassLoaderEmbedded == null) {
       this.factoryWebAppClassLoaderEmbedded =
-        new FactoryWebAppClassLoaderEmbedded();
+        new FctWapClsLdEmb();
     }
     return this.factoryWebAppClassLoaderEmbedded;
   }

@@ -28,27 +28,45 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.beigesoft.ajetty;
 
-import org.eclipse.jetty.webapp.WebAppClassLoader;
-import org.eclipse.jetty.webapp.WebAppClassLoaderStd;
-
-import org.beigesoft.afactory.IFactoryParam;
+import org.beigesoft.afactory.IFactoryAppBeans;
 
 /**
- * <p>Factory of WebAppClassLoaderStd.</p>
+ * <p>Factory app-beans for standart Java.</p>
  *
  * @author Yury Demidenko
  */
-public class FactoryWebAppClassLoaderStd
-  implements IFactoryParam<WebAppClassLoaderStd, WebAppClassLoader.Context> {
+public class FctApp implements IFactoryAppBeans {
 
   /**
-   * <p>Create a bean with abstract params.</p>
-   * @param pParam parameter
-   * @return M request(or) scoped bean
+   * <p>Factory WebAppClassLoaderStd.</p>
+   **/
+  private FctWapClsLd factoryWebAppClassLoaderStd;
+
+  /**
+   * <p>Get bean in lazy mode (if bean is null then initialize it).</p>
+   * @param pBeanName - bean name
+   * @return Object - requested bean
+   * @throws Exception - an exception
    */
   @Override
-  public final WebAppClassLoaderStd create(
-    final WebAppClassLoader.Context pContext) throws Exception {
-    return new WebAppClassLoaderStd(pContext);
+  public final synchronized Object lazyGet(
+    final String pBeanName) throws Exception {
+    if ("IFactoryParam<IUrlClassLoader, WebAppClassLoader.Context>"
+      .equals(pBeanName)) {
+      return lazyGetFactoryWebAppClassLoaderStd();
+    }
+    throw new Exception("There is no bean: " + pBeanName);
+  }
+
+  /**
+   * <p>Getter for factoryWebAppClassLoaderStd.</p>
+   * @return FctWapClsLd
+   **/
+  public final FctWapClsLd
+    lazyGetFactoryWebAppClassLoaderStd() {
+    if (this.factoryWebAppClassLoaderStd == null) {
+      this.factoryWebAppClassLoaderStd = new FctWapClsLd();
+    }
+    return this.factoryWebAppClassLoaderStd;
   }
 }

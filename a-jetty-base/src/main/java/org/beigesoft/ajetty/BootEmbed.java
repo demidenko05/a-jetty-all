@@ -46,7 +46,7 @@ import org.beigesoft.afactory.IFactoryAppBeans;
 
 /**
  * <p>
- * BootStrapEmbedded for A-Jetty configured as minimum server
+ * BootEmbed for A-Jetty configured as minimum server
  * with precompiled together WebApp with WEB-INF/web.xml, index.html, all other
  * static files(css, js) that exists on given path, by default path is webapp.
  * This is means that all classes A-Jetty
@@ -55,7 +55,7 @@ import org.beigesoft.afactory.IFactoryAppBeans;
  *
  * @author Yury Demidenko
  */
-public class BootStrapEmbeddedHttps {
+public class BootEmbed {
 
   /**
    * <p>Factory app-beans - only for WEB-app class loader.</p>

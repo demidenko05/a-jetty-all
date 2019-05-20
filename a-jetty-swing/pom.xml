@@ -37,6 +37,11 @@
       <url>http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html</url>
       <distribution>repo</distribution>
     </license>
+    <license>
+      <name>BSD 2-Clause License</name>
+      <url>https://sites.google.com/site/beigesoftware/bsd2csl</url>
+      <distribution>repo</distribution>
+    </license>
   </licenses>
 
   <properties>
@@ -51,9 +56,9 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.7.12</version>
+      <groupId>org.beigesoft</groupId>
+      <artifactId>beige-logging-slf4j</artifactId>
+      <version>1.0.3-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
@@ -68,7 +73,7 @@
           <runOnlyAtExecutionRoot>false</runOnlyAtExecutionRoot>
           <archive>
             <manifest>
-              <mainClass>org.beigesoft.ajetty.BootStrapEmbeddedMain</mainClass>
+              <mainClass>org.beigesoft.ajetty.BootMain</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>

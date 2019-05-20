@@ -1,16 +1,32 @@
-package org.beigesoft.ajetty;
-
 /*
- * Copyright (c) 2018 Beigesoft ™
- *
- * Licensed under the GNU General Public License (GPL), Version 2.0
- * (the "License");
- * you may not use this file except in compliance with the License.
- *
- * You may obtain a copy of the License at
- *
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
+BSD 2-Clause License
+
+Copyright (c) 2019, Beigesoft™
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+package org.beigesoft.ajetty;
 
 import java.io.Console;
 import java.util.Date;
@@ -20,12 +36,12 @@ import java.util.Date;
  *
  * @author Yury Demidenko
  */
-public class BootStrapCli implements IBootStrapIFace {
+public class BootStrapCli implements IBootFace {
 
   /**
    * <p>Main boot strap.</p>
    **/
-  private BootStrapEmbeddedMain mainBootStrap;
+  private BootMain mainBootStrap;
 
   /**
    * <p>Is exit flag.</p>
@@ -53,7 +69,7 @@ public class BootStrapCli implements IBootStrapIFace {
       System.console().printf(dt.toString() + " "
         + this.mainBootStrap.getMsg("wait") + "\n");
     } else {
-      if (this.mainBootStrap.getBootStrapEmbeddedHttps().getIsStarted()) {
+      if (this.mainBootStrap.getBootEmbed().getIsStarted()) {
         System.console().printf(dt.toString() + " "
             + this.mainBootStrap.getMsg("started") + " https://localhost:"
               + this.mainBootStrap.getPort() + "/bsa"
@@ -93,7 +109,7 @@ public class BootStrapCli implements IBootStrapIFace {
       }
     }
     if (!this.mainBootStrap.getIsActionPerforming()) {
-      if (!this.mainBootStrap.getBootStrapEmbeddedHttps().getIsStarted()) {
+      if (!this.mainBootStrap.getBootEmbed().getIsStarted()) {
         enterAjettyNumIfNeed();
         if (this.isExit) {
           return;
@@ -282,9 +298,9 @@ public class BootStrapCli implements IBootStrapIFace {
   //SGS:
   /**
    * <p>Getter for mainBootStrap.</p>
-   * @return BootStrapEmbeddedMain
+   * @return BootMain
    **/
-  public final BootStrapEmbeddedMain getMainBootStrap() {
+  public final BootMain getMainBootStrap() {
     return this.mainBootStrap;
   }
 
@@ -293,7 +309,7 @@ public class BootStrapCli implements IBootStrapIFace {
    * @param pMainBootStrap reference
    **/
   public final void setMainBootStrap(
-    final BootStrapEmbeddedMain pMainBootStrap) {
+    final BootMain pMainBootStrap) {
     this.mainBootStrap = pMainBootStrap;
   }
 }

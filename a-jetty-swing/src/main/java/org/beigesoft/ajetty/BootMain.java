@@ -307,7 +307,7 @@ public class BootMain {
       }
       if (certCa != null) {
         File pemFl = new File(pks12File.getParentFile().getParent()
-          + File.separator + "ajetty-ca.pem");
+          + File.separator + "ajetty-ca" + this.ajettyIn + ".pem");
         JcaPEMWriter pemWriter = null;
         try {
           OutputStreamWriter osw = new OutputStreamWriter(

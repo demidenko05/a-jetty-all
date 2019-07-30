@@ -182,7 +182,7 @@
             <debug>false</debug>
           </run>
           <sdk>
-            <platform>28</platform>
+            <platform>29</platform>
           </sdk>
           <undeployBeforeDeploy>true</undeployBeforeDeploy>
           <extractDuplicates>true</extractDuplicates>

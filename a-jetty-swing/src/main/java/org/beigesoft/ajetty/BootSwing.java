@@ -348,7 +348,7 @@ public class BootSwing extends JFrame implements ActionListener, IBootFace {
   private WindowListener windowListener = new WindowAdapter() {
 
     @Override
-    public final void windowClosing(final WindowEvent e) {
+    public void windowClosing(final WindowEvent e) {
       if (BootSwing.this.mainBootStrap
         .getIsActionPerforming()) {
         long currDate = new Date().getTime();

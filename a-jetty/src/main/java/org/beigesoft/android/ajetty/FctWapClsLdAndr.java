@@ -57,7 +57,7 @@ public class FctWapClsLdAndr implements
 
   /**
    * <p>Create a bean with abstract params.</p>
-   * @param pParam parameter
+   * @param pContext Context
    * @return M request(or) scoped bean
    */
   @Override

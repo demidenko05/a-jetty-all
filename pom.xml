@@ -149,7 +149,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-checkstyle-plugin</artifactId>
-            <version>2.17</version>
+            <version>3.1.0</version>
             <executions>
               <execution>
               <id>checkstyle</id>
@@ -165,16 +165,16 @@
             </configuration>
           </plugin>
           <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>findbugs-maven-plugin</artifactId>
-            <version>3.0.3</version>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-maven-plugin</artifactId>
+            <version>3.1.12.2</version>
             <configuration>
               <excludeFilterFile>findbug-exclude.xml</excludeFilterFile>
             </configuration>
             <executions>
               <execution>
-              <id>findbugs</id>
-              <phase>compile</phase>
+              <id>spotbugs</id>
+              <phase>verify</phase>
               <goals>
                 <goal>check</goal>
               </goals>
@@ -184,7 +184,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-pmd-plugin</artifactId>
-            <version>3.6</version>
+            <version>3.12.0</version>
             <configuration>
               <printFailingErrors>true</printFailingErrors>
               <excludes>
@@ -200,7 +200,7 @@
             <executions>
               <execution>
               <id>pmd</id>
-              <phase>compile</phase>
+              <phase>verify</phase>
               <goals>
                 <goal>check</goal>
               </goals>
@@ -220,53 +220,6 @@
      <scope>test</scope>
     </dependency>
   </dependencies>
-  
-  <reporting>
-    <plugins>
-      <plugin>
-       <groupId>org.apache.maven.plugins</groupId>
-       <artifactId>maven-site-plugin</artifactId>
-       <version>3.3</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>2.7</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jxr-plugin</artifactId>
-        <version>2.5</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-pmd-plugin</artifactId>
-        <version>3.6</version>
-        <configuration>
-          <excludes>**/eclipse/**</excludes>
-                <!--Rule:AvoidUsingHardCodedIP is wrong-->
-          <exclude>org/beigesoft/ajetty/BootStrap.java</exclude>
-         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>2.17</version>
-        <configuration>
-          <suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
-          <excludes>**/R.java,**/BuildConfig.java,**/eclipse/**</excludes>
-         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
-        <version>3.0.3</version>
-        <configuration>
-          <excludeFilterFile>findbug-exclude.xml</excludeFilterFile>
-        </configuration>
-      </plugin>
-    </plugins>
-  </reporting>
   
   <build>
     <finalName>${project.artifactId}</finalName>

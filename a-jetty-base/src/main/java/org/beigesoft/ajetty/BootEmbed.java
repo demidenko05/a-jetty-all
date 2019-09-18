@@ -78,11 +78,6 @@ public class BootEmbed {
   private Server server;
 
   /**
-   * <p>Host IP address.</p>
-   **/
-  private String hostAddress = "127.0.0.1";
-
-  /**
    * <p>Webapp context.</p>
    **/
   private WebAppContext webAppContext;
@@ -155,7 +150,7 @@ public class BootEmbed {
       ServerConnector connector = new ServerConnector(server,
         new SslConnectionFactory(sslContextFactory, "http/1.1"),
           new HttpConnectionFactory(httpsConf));
-      connector.setHost(this.hostAddress);
+      connector.setHost("127.0.0.1");
       connector.setPort(this.port);
       connector.setIdleTimeout(500000);
       server.setConnectors(new Connector[] {connector});
@@ -287,22 +282,6 @@ public class BootEmbed {
    **/
   public final WebAppContext getWebAppContext() {
     return this.webAppContext;
-  }
-
-  /**
-   * <p>Getter for hostAddress.</p>
-   * @return String
-   **/
-  public final String getHostAddress() {
-    return this.hostAddress;
-  }
-
-  /**
-   * <p>Setter for hostAddress.</p>
-   * @param pHostAddress reference
-   **/
-  public final void setHostAddress(final String pHostAddress) {
-    this.hostAddress = pHostAddress;
   }
 
   /**

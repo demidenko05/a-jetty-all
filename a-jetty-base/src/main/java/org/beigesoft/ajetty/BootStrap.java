@@ -96,11 +96,6 @@ public class BootStrap {
   private ServerConnector connector;
 
   /**
-   * <p>Host IP address.</p>
-   **/
-  private String hostAddress = "127.0.0.1";
-
-  /**
    * <p>Create and configure server.</p>
    * @throws Exception an Exception
    **/
@@ -112,7 +107,7 @@ public class BootStrap {
     this.server = new Server();
     this.connector = new ServerConnector(server);
     this.connector.setPort(this.port);
-    this.connector.setHost(this.hostAddress);
+    this.connector.setHost("127.0.0.1");
     this.server.setConnectors(new Connector[] {this.connector});
     // Handlers:
     HandlerCollection handlers = new HandlerCollection();
@@ -240,22 +235,6 @@ public class BootStrap {
    **/
   public final ServerConnector getConnector() {
     return this.connector;
-  }
-
-  /**
-   * <p>Getter for hostAddress.</p>
-   * @return String
-   **/
-  public final String getHostAddress() {
-    return this.hostAddress;
-  }
-
-  /**
-   * <p>Setter for hostAddress.</p>
-   * @param pHostAddress reference
-   **/
-  public final void setHostAddress(final String pHostAddress) {
-    this.hostAddress = pHostAddress;
   }
 
   /**

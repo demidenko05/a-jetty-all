@@ -280,8 +280,8 @@ public class BootSwing extends JFrame implements ActionListener, IBootFace {
           .browse(new URI(this.btBrowse.getText()));
       }
     } catch (Exception ex) {
+      setTitle(this.mainBootStrap.getMsg("err_see_starter_log"));
       this.mainBootStrap.setIsActionPerforming(false);
-      setTitle("Error! See starter.log!");
       this.mainBootStrap.getLogger()
         .error(null, BootSwing.class, null, ex);
     }

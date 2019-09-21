@@ -58,6 +58,8 @@ import org.beigesoft.log.LogFile;
  * file. There are two interfaces - SWING and command line (CLI).
  * Add "cli" argument to start CLI,
  * i.e. "java -jar BootMain.jar cli"
+ * To using English messages add to command line "eng",
+ * e.g. "java -jar BootMain.jar eng"
  * </p>
  *
  * @author Yury Demidenko
@@ -67,15 +69,15 @@ public class BootMain {
   /**
    * <p>Factory app-beans - only for WEB-app class loader.</p>
    **/
-  private final IFactoryAppBeans factoryAppBeans;
+  private IFactoryAppBeans factoryAppBeans;
 
   /**
    * <p>Bootstrap.</p>
    **/
-  private final BootEmbed bootEmbed;
+  private BootEmbed bootEmbed;
 
   /**
-   * <p>I18N.</p>
+   * <p>I18N localized or English.</p>
    **/
   private ResourceBundle messages;
 
@@ -145,10 +147,15 @@ public class BootMain {
   private boolean isLastStartFail = false;
 
   /**
-   * <p>Only constructor.</p>
+   * <p>If messages in English.</p>
+   **/
+  private boolean isEng = false;
+
+  /**
+   * <p>Initializes this before using.</p>
    * @throws ExceptionStart ExceptionStart
    **/
-  public BootMain() throws ExceptionStart {
+  public final void init() throws ExceptionStart {
     String appDir = null;
     try {
       File jarBoot = new File(BootMain.class
@@ -166,11 +173,15 @@ public class BootMain {
       log.setClsImm(true);
       this.logger = log;
     }
-    try {
-      this.messages = ResourceBundle.getBundle("MessagesAjetty");
-    } catch (Exception e) {
-      this.logger.error(null, BootMain.class,
-        "Can't load messages for default locale", e);
+    if (!this.isEng) {
+      try {
+        this.messages = ResourceBundle.getBundle("MessagesAjetty");
+      } catch (Exception e) {
+        this.logger.error(null, BootMain.class,
+          "Can't load messages for default locale", e);
+      }
+    }
+    if (this.messages == null) {
       try {
         Locale locale = new Locale("en", "US");
         this.messages = ResourceBundle.getBundle("MessagesAjetty", locale);
@@ -188,8 +199,7 @@ public class BootMain {
         }
       }
     } catch (Exception e) {
-      this.logger.warn(null, BootMain.class,
-        "IS DEBUG CHECKING: ", e);
+      this.logger.warn(null, BootMain.class, "IS DEBUG CHECKING: ", e);
     }
     try {
       if (this.cryptoService == null) {
@@ -397,8 +407,21 @@ public class BootMain {
    **/
   public static final void main(final String[] pArgs) {
     try {
+      boolean cli = false;
+      boolean eng = false;
+      if (pArgs != null && pArgs.length > 0) {
+        for (String arg : pArgs) {
+          if ("cli".equals(arg)) {
+            cli = true;
+          } else if ("eng".equals(arg)) {
+            eng = true;
+          }
+        }
+      }
       final BootMain bsem = new BootMain();
-      if (pArgs != null && pArgs.length > 0 && "cli".equals(pArgs[0])) {
+      bsem.setIsEng(eng);
+      bsem.init();
+      if (cli) {
         //command line interface:
         BootStrapCli bsc = new BootStrapCli();
         bsc.setMainBootStrap(bsem);
@@ -553,6 +576,23 @@ public class BootMain {
   }
 
   /**
+   * <p>Setter for factoryAppBeans.</p>
+   * @param pFactoryAppBeans reference
+   **/
+  public final void setFactoryAppBeans(
+    final IFactoryAppBeans pFactoryAppBeans) {
+    this.factoryAppBeans = pFactoryAppBeans;
+  }
+
+  /**
+   * <p>Setter for bootEmbed.</p>
+   * @param pBootEmbed reference
+   **/
+  public final void setBootEmbed(final BootEmbed pBootEmbed) {
+    this.bootEmbed = pBootEmbed;
+  }
+
+  /**
    * <p>Getter for messages.</p>
    * @return ResourceBundle
    **/
@@ -703,5 +743,21 @@ public class BootMain {
    **/
   public final void setIsLastStartFail(final boolean pIsLastStartFail) {
     this.isLastStartFail = pIsLastStartFail;
+  }
+
+  /**
+   * <p>Getter for isEng.</p>
+   * @return boolean
+   **/
+  public final boolean getIsEng() {
+    return this.isEng;
+  }
+
+  /**
+   * <p>Setter for isEng.</p>
+   * @param pIsEng reference
+   **/
+  public final void setIsEng(final boolean pIsEng) {
+    this.isEng = pIsEng;
   }
 }

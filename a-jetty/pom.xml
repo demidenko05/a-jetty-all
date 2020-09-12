@@ -57,7 +57,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-jarsigner-plugin</artifactId>
-            <version>1.4</version>
+            <version>3.0.0</version>
             <executions>
               <execution>
                 <id>signing</id>
@@ -81,7 +81,7 @@
           <plugin>
             <groupId>com.simpligility.maven.plugins</groupId>
             <artifactId>android-maven-plugin</artifactId>
-            <version>4.5.0</version>
+            <version>4.6.0</version>
             <inherited>true</inherited>
             <configuration>
               <sign>
@@ -107,7 +107,7 @@
           <plugin>  
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-antrun-plugin</artifactId>
-            <version>1.7</version>
+            <version>3.0.0</version>
             <executions>
               <execution>
                 <id>remove-unaligned-apk</id>
@@ -133,7 +133,7 @@
           <plugin>
             <groupId>com.simpligility.maven.plugins</groupId>
             <artifactId>android-maven-plugin</artifactId>
-            <version>4.5.0</version>
+            <version>4.6.0</version>
             <inherited>true</inherited>
             <configuration>
               <sign>
@@ -173,16 +173,27 @@
   <build>
     <finalName>${project.artifactId}</finalName>
     <plugins>
+      <!--Old plugins cause new maven install plugin gives error: "...NoFileAssignedException... Change packaging to 'pom'..."-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <version>2.5.2</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>2.8.2</version>
+      </plugin>
       <plugin>
         <groupId>com.simpligility.maven.plugins</groupId>
         <artifactId>android-maven-plugin</artifactId>
-        <version>4.5.0</version>
+        <version>4.6.0</version>
         <configuration>
           <run>
             <debug>false</debug>
           </run>
           <sdk>
-            <platform>29</platform>
+            <platform>30</platform>
           </sdk>
           <undeployBeforeDeploy>true</undeployBeforeDeploy>
           <extractDuplicates>true</extractDuplicates>

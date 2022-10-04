@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -347,11 +348,7 @@ public class WebInfConfiguration extends AbstractConfiguration
         else
         {
             //ensure file will always be unique by appending random digits
-            tmpDir = File.createTempFile(temp, ".dir", parent);
-            //delete the file that was created
-            tmpDir.delete();
-            //and make a directory of the same name
-            tmpDir.mkdirs();
+            tmpDir = Files.createTempDirectory(parent.toPath(),temp + ".dir").toFile();
         }
         configureTempDirectory(tmpDir, context);
 

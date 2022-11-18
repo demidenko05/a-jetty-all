@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -42,7 +43,6 @@ import javax.servlet.http.Part;
 
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
-
 
 
 /**
@@ -133,7 +133,7 @@ public class MultiPartInputStreamParser
         protected void createFile ()
         throws IOException
         {
-            _file = File.createTempFile("MultiPart", "", MultiPartInputStreamParser.this._tmpDir);
+            _file = Files.createTempFile(MultiPartInputStreamParser.this._tmpDir.toPath(),"MultiPart","").toFile();
             
             if (_deleteOnExit)
                 _file.deleteOnExit();
